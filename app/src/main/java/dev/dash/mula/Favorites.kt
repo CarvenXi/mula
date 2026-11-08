@@ -13,7 +13,7 @@ data class Favorite(val name: String, val url: String)
 /** 主页收藏（书签）的增删改 + 本地持久化。 */
 class FavoritesStore(context: Context) {
 
-    private val prefs = context.getSharedPreferences("mafari", Context.MODE_PRIVATE)
+    private val prefs = context.getSharedPreferences("mula", Context.MODE_PRIVATE)
 
     val items = mutableStateListOf<Favorite>().apply {
         addAll(load())
@@ -88,7 +88,7 @@ class FavoritesStore(context: Context) {
     fun exportHtml(): String = buildString {
         appendLine("<!DOCTYPE NETSCAPE-Bookmark-file-1>")
         appendLine("<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=UTF-8\">")
-        appendLine("<TITLE>Mafari Bookmarks</TITLE>")
+        appendLine("<TITLE>Mula Bookmarks</TITLE>")
         appendLine("<H1>Bookmarks</H1>")
         appendLine("<DL><p>")
         items.forEach { item ->

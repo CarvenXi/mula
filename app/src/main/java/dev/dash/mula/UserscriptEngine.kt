@@ -111,14 +111,14 @@ object UserscriptEngine {
   function split(s){ return s ? s.split('\n').filter(Boolean) : []; }
   if (!matchUrl(location.href, split(META.match), split(META.include), split(META.exclude))) return;
 
-  var RAN = window.__mafariRan || (window.__mafariRan = {});
+  var RAN = window.__mulaRan || (window.__mulaRan = {});
   if (RAN[META.id]) return;
   RAN[META.id] = 1;
 
   // ---------- GM API ----------
-  var bridge = window.MafariGM || null;
-  var xhrCbs = window.__mafariXhrCallbacks || (window.__mafariXhrCallbacks = {});
-  window.__mafariXhrDone = function(reqId, status, text, finalUrl){
+  var bridge = window.MulaGM || null;
+  var xhrCbs = window.__mulaXhrCallbacks || (window.__mulaXhrCallbacks = {});
+  window.__mulaXhrDone = function(reqId, status, text, finalUrl){
     var cb = xhrCbs[reqId];
     if (!cb) return;
     delete xhrCbs[reqId];
@@ -126,7 +126,7 @@ object UserscriptEngine {
     try { if (cb.onload) cb.onload(resp); if (cb.onreadystatechange) cb.onreadystatechange(resp); } catch(e){}
   };
   var GM = {
-    info: { scriptHandler: 'Mafari', version: '3.5.0', script: { name: META.name, id: META.id } },
+    info: { scriptHandler: 'Mula', version: '3.5.0', script: { name: META.name, id: META.id } },
     setValue: function(k, v){ try { if (bridge) bridge.setValue(META.id, k, JSON.stringify(v)); } catch(e){} },
     getValue: function(k, d){
       try {
@@ -188,7 +188,7 @@ $requires
 $body
     })(GM, unsafeWindow, window);
   } catch (err) {
-    try { console.error('[Mafari userscript] ' + META.name + ': ' + (err && err.message)); } catch(e){}
+    try { console.error('[Mula userscript] ' + META.name + ': ' + (err && err.message)); } catch(e){}
   }
 })();
 """.trimIndent()

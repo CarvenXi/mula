@@ -36,7 +36,7 @@ data class DownloadTask(
     val error: String? = null,
 )
 
-/** 内置下载器：断点续传、暂停/继续、失败重试，默认写入 Download/mafari */
+/** 内置下载器：断点续传、暂停/继续、失败重试，默认写入 Download/mula */
 object Downloader {
 
     val tasks = mutableStateListOf<DownloadTask>()
@@ -92,7 +92,7 @@ object Downloader {
     }
 
     private fun tempFile(context: Context, id: Long) =
-        java.io.File(context.cacheDir, "mafari_dl_$id.part")
+        java.io.File(context.cacheDir, "mula_dl_$id.part")
 
     private fun launch(context: Context, id: Long) {
         jobs.remove(id)?.cancel()
@@ -131,7 +131,7 @@ object Downloader {
             connectTimeout = 15000
             readTimeout = 30000
             instanceFollowRedirects = true
-            setRequestProperty("User-Agent", task.userAgent ?: "Mozilla/5.0 mafari")
+            setRequestProperty("User-Agent", task.userAgent ?: "Mozilla/5.0 mula")
             setRequestProperty("Accept", "*/*")
             setRequestProperty("Accept-Encoding", "identity")
             if (existing > 0) setRequestProperty("Range", "bytes=$existing-")
@@ -187,7 +187,7 @@ object Downloader {
                     update(id) { it.copy(bytes = written) }
                 }
             }
-            // 下载完成后一次性入库到 /sdcard/Download/mafari
+            // 下载完成后一次性入库到 /sdcard/Download/mula
             val uri = createEntry(context, task) ?: throw IllegalStateException("无法创建文件")
             context.contentResolver.openOutputStream(uri)?.use { out ->
                 file.inputStream().use { input ->
@@ -220,7 +220,7 @@ object Downloader {
             readTimeout = 10000
             instanceFollowRedirects = true
             setRequestProperty("Range", "bytes=0-0")
-            setRequestProperty("User-Agent", task.userAgent ?: "Mozilla/5.0 mafari")
+            setRequestProperty("User-Agent", task.userAgent ?: "Mozilla/5.0 mula")
             setRequestProperty("Accept-Encoding", "identity")
         }
         val code = head.responseCode
@@ -251,7 +251,7 @@ object Downloader {
                             readTimeout = 30000
                             instanceFollowRedirects = true
                             setRequestProperty("Range", "bytes=$start-$end")
-                            setRequestProperty("User-Agent", task.userAgent ?: "Mozilla/5.0 mafari")
+                            setRequestProperty("User-Agent", task.userAgent ?: "Mozilla/5.0 mula")
                             setRequestProperty("Accept-Encoding", "identity")
                         }
                         try {
@@ -324,7 +324,7 @@ object Downloader {
         val values = ContentValues().apply {
             put(MediaStore.Downloads.DISPLAY_NAME, task.name)
             put(MediaStore.Downloads.MIME_TYPE, task.mime ?: "application/octet-stream")
-            put(MediaStore.Downloads.RELATIVE_PATH, "Download/mafari")
+            put(MediaStore.Downloads.RELATIVE_PATH, "Download/mula")
             put(MediaStore.Downloads.IS_PENDING, 1)
         }
         context.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
@@ -346,7 +346,7 @@ object Downloader {
         val values = ContentValues().apply {
             put(MediaStore.Downloads.DISPLAY_NAME, fileName)
             put(MediaStore.Downloads.MIME_TYPE, mime)
-            put(MediaStore.Downloads.RELATIVE_PATH, "Download/mafari")
+            put(MediaStore.Downloads.RELATIVE_PATH, "Download/mula")
             put(MediaStore.Downloads.IS_PENDING, 1)
         }
         val uri = context.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)

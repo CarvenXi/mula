@@ -550,7 +550,7 @@ private fun fetchScript(url: String): String? = runCatching {
     val connection = (java.net.URL(url).openConnection() as java.net.HttpURLConnection).apply {
         connectTimeout = 8000
         readTimeout = 8000
-        setRequestProperty("User-Agent", "Mozilla/5.0 mafari")
+        setRequestProperty("User-Agent", "Mozilla/5.0 mula")
     }
     try {
         if (connection.responseCode !in 200..299) return@runCatching null

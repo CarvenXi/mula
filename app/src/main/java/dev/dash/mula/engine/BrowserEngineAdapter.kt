@@ -4,7 +4,7 @@ import android.view.View
 import android.webkit.WebView
 
 /**
- * Mafari 内核边界。UI 和标签管理只依赖该契约，不依赖具体内核类型。
+ * Mula 内核边界。UI 和标签管理只依赖该契约，不依赖具体内核类型。
  * 内核专属能力通过 EngineCapabilities 明确声明，不能假装所有内核都支持相同功能。
  */
 interface BrowserEngineAdapter {

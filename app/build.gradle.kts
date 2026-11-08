@@ -11,13 +11,13 @@ plugins {
 }
 
 // Servo engine is delivered as a separately built APK plugin. The main app has no Servo classes.
-// Default to the latest Servo plugin asset published with Mafari GitHub Releases.
+// Default to the latest Servo plugin asset published with Mula GitHub Releases.
 // A SHA-256 may be supplied at build time; otherwise the app fetches the adjacent .sha256 file.
 val servoPluginUrl = providers.gradleProperty("servoPluginUrl")
-    .orElse("https://github.com/CarvenXi/mafari/releases/latest/download/servo-engine.apk")
+    .orElse("https://github.com/CarvenXi/mula/releases/latest/download/servo-engine.apk")
 val servoPluginSha256 = providers.gradleProperty("servoPluginSha256").orElse("")
 val geckoPluginUrl = providers.gradleProperty("geckoPluginUrl")
-    .orElse("https://github.com/CarvenXi/mafari/releases/latest/download/gecko-engine.apk")
+    .orElse("https://github.com/CarvenXi/mula/releases/latest/download/gecko-engine.apk")
 val geckoPluginSha256 = providers.gradleProperty("geckoPluginSha256").orElse("")
 
 android {
@@ -33,8 +33,8 @@ android {
         applicationId = "dev.dash.mula"
         minSdk = 33
         targetSdk = 37
-        versionCode = 141
-        versionName = "v1.4.1"
+        versionCode = 140
+        versionName = "v1.4.0"
         buildConfigField("String", "SERVO_PLUGIN_APK_URL", "\"${servoPluginUrl.get()}\"")
         buildConfigField("String", "SERVO_PLUGIN_SHA256", "\"${servoPluginSha256.get()}\"")
         buildConfigField("String", "GECKO_PLUGIN_APK_URL", "\"${geckoPluginUrl.get()}\"")
@@ -52,13 +52,13 @@ android {
     }
 
     signingConfigs {
-        val keystorePath = System.getenv("MAFARI_KEYSTORE")
+        val keystorePath = System.getenv("MULA_KEYSTORE")
         if (keystorePath != null && rootProject.file(keystorePath).exists()) {
             create("release") {
                 storeFile = rootProject.file(keystorePath)
-                storePassword = System.getenv("MAFARI_STORE_PASS")
-                keyAlias = System.getenv("MAFARI_KEY_ALIAS")
-                keyPassword = System.getenv("MAFARI_KEY_PASS")
+                storePassword = System.getenv("MULA_STORE_PASS")
+                keyAlias = System.getenv("MULA_KEY_ALIAS")
+                keyPassword = System.getenv("MULA_KEY_PASS")
             }
         }
     }

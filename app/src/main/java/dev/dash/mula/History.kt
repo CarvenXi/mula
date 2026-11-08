@@ -9,7 +9,7 @@ data class HistoryEntry(val url: String, val title: String, val time: Long)
 
 class HistoryStore(context: Context) {
 
-    private val prefs = context.getSharedPreferences("mafari_history", Context.MODE_PRIVATE)
+    private val prefs = context.getSharedPreferences("mula_history", Context.MODE_PRIVATE)
 
     val items = mutableStateListOf<HistoryEntry>().apply { addAll(load()) }
 

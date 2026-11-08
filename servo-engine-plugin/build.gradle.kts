@@ -21,7 +21,7 @@ val prepareServoAar by tasks.registering {
         val tmp = File(out.parentFile, "servo.aar.part")
         URL(servoAarUrl.get()).openConnection().apply {
             connectTimeout = 30000; readTimeout = 180000
-            setRequestProperty("User-Agent", "Mafari-Servo-Plugin-Build")
+            setRequestProperty("User-Agent", "Mula-Servo-Plugin-Build")
         }.getInputStream().use { input -> tmp.outputStream().use { input.copyTo(it) } }
         require(tmp.length() > 1_000_000L) { "Servo AAR size looks invalid" }
         ZipFile(tmp).use { require(it.getEntry("classes.jar") != null) { "Not a valid AAR" } }
@@ -35,11 +35,7 @@ val prepareServoAar by tasks.registering {
 
 android {
     namespace = "dev.dash.mula.servoplugin"
-    compileSdk {
-        version = release(37) {
-            minorApiLevel = 0
-        }
-    }
+    compileSdk = 37
     defaultConfig { applicationId = "dev.dash.mula.servoplugin"; minSdk = 33; targetSdk = 36; versionCode = 1; versionName = "1.0.0" }
     buildTypes { release { isMinifyEnabled = false } }
     packaging { jniLibs { useLegacyPackaging = false }; resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }

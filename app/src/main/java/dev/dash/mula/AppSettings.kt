@@ -7,7 +7,7 @@ import androidx.compose.runtime.setValue
 
 class AppSettings(context: Context) {
 
-    private val prefs = context.getSharedPreferences("mafari_settings", Context.MODE_PRIVATE)
+    private val prefs = context.getSharedPreferences("mula_settings", Context.MODE_PRIVATE)
 
     var blurEnabled by mutableStateOf(prefs.getBoolean(KEY_BLUR, true))
         private set

@@ -15,5 +15,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "MiuixBrowser"
+rootProject.name = "Mula"
 include(":app", ":servo-engine-plugin", ":gecko-engine-plugin")

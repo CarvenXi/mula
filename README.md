@@ -1,4 +1,4 @@
-# Mafari
+# Mula
 
 基于 **MIUIX**（Compose Multiplatform）+ **系统 WebView** 的 Android 浏览器。不内嵌 Chromium 内核，安装包约 1.5 MB（R8 精简后）。
 
@@ -33,7 +33,7 @@
 - 从 URL 导入 `.user.js`、一键更新；自动识别 `.user.js` 链接并弹导入确认
 
 **下载**
-- 内置下载器（不走系统下载器），先写缓存再入库到 `/sdcard/Download/mafari`
+- 内置下载器（不走系统下载器），先写缓存再入库到 `/sdcard/Download/mula`
 - 4 线程分段下载（服务器支持 Range 时）、断点续传、暂停/继续、失败重试、删除记录与文件
 - 前台服务 + 进度通知；按小米官方文档接入**超级岛**（`miui.focus.param`，仅在开始下载时上岛）
 
@@ -70,9 +70,9 @@ git tag v3.3.0 && git push origin v3.3.0
 
 ## 项目地址
 
-https://github.com/rosenii/mafari
+https://github.com/CarvenXi/mafari
 
 
 ### Browser engines
 
-Mafari supports Android WebView, Servo (separate runtime plugin), and GeckoView (separate runtime plugin). Servo and GeckoView are downloaded on demand from GitHub Releases and are not bundled into the main APK.
+Mula supports Android WebView, Servo (separate runtime plugin), and GeckoView (separate runtime plugin). Servo and GeckoView are downloaded on demand from GitHub Releases and are not bundled into the main APK.

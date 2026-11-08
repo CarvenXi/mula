@@ -9,9 +9,9 @@
 4. 新建标签页默认使用当前设置的内核。
 
 ## 当前边界
-Servo AAR 目前提供的 Android API 只暴露基础导航、标题/URL/加载状态和 Surface 渲染回调。以下 Mafari 功能仍由 WebView 实现，切换到 Servo 后暂不可用或不会生效：
+Servo AAR 目前提供的 Android API 只暴露基础导航、标题/URL/加载状态和 Surface 渲染回调。以下 Mula 功能仍由 WebView 实现，切换到 Servo 后暂不可用或不会生效：
 - Tampermonkey / 用户脚本与 document-start 注入
-- Mafari 页面元素检查、广告元素长按标记
+- Mula 页面元素检查、广告元素长按标记
 - WebView DownloadListener 下载接管
 - WebView UA / 桌面站点 UA 切换
 - WebView 页内查找

@@ -92,7 +92,7 @@ fun SettingsScreen(
     var engineDownloadState by remember { mutableStateOf("") }
     val servoManager = remember { dev.dash.mula.engine.ServoPluginManager(context) }
     val geckoManager = remember { dev.dash.mula.engine.GeckoPluginManager(context) }
-    // Servo 暂不支持 Mafari 的页面增强能力，切换到 Servo 后持久化关闭。
+    // Servo 暂不支持 Mula 的页面增强能力，切换到 Servo 后持久化关闭。
     LaunchedEffect(settings.browserEngine) {
         if (settings.browserEngine != 0 && settings.pageEnhancements) {
             settings.updatePageEnhancements(false)
@@ -277,7 +277,7 @@ fun SettingsScreen(
                     }
                     SettingsRow(
                         title = "Servo 内核管理",
-                        summary = if (servoManager.isInstalled()) "已安装 · ${(servoManager.installedSize() / (1024 * 1024))} MB · 点击检查更新/重新下载" else "未安装 · 从 Mafari 发布页下载",
+                        summary = if (servoManager.isInstalled()) "已安装 · ${(servoManager.installedSize() / (1024 * 1024))} MB · 点击检查更新/重新下载" else "未安装 · 从 Mula 发布页下载",
                         onClick = {
                             engineScope.launch {
                                 val url = BuildConfig.SERVO_PLUGIN_APK_URL
@@ -303,14 +303,14 @@ fun SettingsScreen(
                                 if (url.isBlank()) engineDownloadState = "GeckoView 插件发布地址未配置" else {
                                     engineDownloadState = "正在下载/更新 GeckoView 内核…"
                                     runCatching { geckoManager.install(url, sha) }
-                                        .onSuccess { engineDownloadState = "GeckoView 内核已更新，重启 Mafari 后生效" }
+                                        .onSuccess { engineDownloadState = "GeckoView 内核已更新，重启 Mula 后生效" }
                                         .onFailure { engineDownloadState = "更新失败：${it.message ?: "未知错误"}" }
                                 }
                             }
                         },
                     )
                     if (settings.browserEngine != 0) {
-                        // 非 WebView 内核暂不支持 Mafari 页面增强，避免显示可用开关。
+                        // 非 WebView 内核暂不支持 Mula 页面增强，避免显示可用开关。
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -346,7 +346,7 @@ fun SettingsScreen(
                     insideMargin = PaddingValues(0.dp),
                 ) {
                     SettingsRow(
-                        title = "关于 Mafari",
+                        title = "关于 Mula",
                         summary = "版本 " + BuildConfig.VERSION_NAME,
                         onClick = onOpenAbout,
                     )
@@ -446,8 +446,8 @@ internal fun webViewVersion(): String? {
     }
 }
 
-private const val PROJECT_URL = "https://github.com/rosenii/mafari"
-private const val RELEASE_API = "https://api.github.com/repos/rosenii/mafari/releases/latest"
+private const val PROJECT_URL = "https://github.com/CarvenXi/mafari"
+private const val RELEASE_API = "https://api.github.com/repos/CarvenXi/mafari/releases/latest"
 
 @Composable
 internal fun CheckUpdateButton() {
@@ -493,7 +493,7 @@ private fun fetchLatestVersion(): Pair<String, String>? = runCatching {
     val connection = (java.net.URL(RELEASE_API).openConnection() as java.net.HttpURLConnection).apply {
         connectTimeout = 8000
         readTimeout = 8000
-        setRequestProperty("User-Agent", "mafari")
+        setRequestProperty("User-Agent", "mula")
         setRequestProperty("Accept", "application/vnd.github+json")
     }
     try {

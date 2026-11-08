@@ -117,7 +117,7 @@ fun AboutScreen(onBack: () -> Unit, blurEnabled: Boolean = true) {
                 }
                 Spacer(Modifier.height(20.dp))
                 Text(
-                    text = "Mafari",
+                    text = "Mula",
                     fontSize = 30.sp,
                     fontWeight = FontWeight.Bold,
                     color = MiuixTheme.colorScheme.onSurface,
@@ -169,7 +169,7 @@ fun AboutScreen(onBack: () -> Unit, blurEnabled: Boolean = true) {
                         .clickable {
                             runCatching {
                                 context.startActivity(
-                                    Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/rosenii/mafari")),
+                                    Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/CarvenXi/mafari")),
                                 )
                             }
                         }
@@ -178,7 +178,7 @@ fun AboutScreen(onBack: () -> Unit, blurEnabled: Boolean = true) {
                     Text("项目地址", fontSize = 16.sp, color = MiuixTheme.colorScheme.onSurface)
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "https://github.com/rosenii/mafari",
+                        text = "https://github.com/CarvenXi/mafari",
                         fontSize = 12.sp,
                         color = MiuixTheme.colorScheme.primary,
                         maxLines = 1,
@@ -189,7 +189,7 @@ fun AboutScreen(onBack: () -> Unit, blurEnabled: Boolean = true) {
 
             Spacer(Modifier.height(18.dp))
             Text(
-                text = "Mafari · 基于 MIUIX 与系统 WebView",
+                text = "Mula · 基于 MIUIX 与系统 WebView",
                 fontSize = 12.sp,
                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                 modifier = Modifier.padding(horizontal = 20.dp),

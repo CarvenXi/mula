@@ -172,7 +172,7 @@ fun DownloadsScreen(onBack: () -> Unit, blurEnabled: Boolean = true) {
             ) {
                 if (tasks.isEmpty()) {
                     Text(
-                        text = "还没有下载任务。网页里的下载会先弹确认框，再保存到 /sdcard/Download/mafari。",
+                        text = "还没有下载任务。网页里的下载会先弹确认框，再保存到 /sdcard/Download/mula。",
                         fontSize = 13.sp,
                         color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                         modifier = Modifier

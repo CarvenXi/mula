@@ -11,7 +11,7 @@ interface GeckoPluginListener {
     fun onEvent(event: String, value: String?)
 }
 
-/** One instance represents one Mafari tab; all sessions share one process-wide GeckoRuntime. */
+/** One instance represents one Mula tab; all sessions share one process-wide GeckoRuntime. */
 class GeckoPluginHandle internal constructor(
     private val session: GeckoSession,
     private val geckoView: GeckoView,

@@ -41,7 +41,7 @@ class GeckoPluginManager(context: Context) {
             try {
                 val connection = URL(apkUrl).openConnection().apply {
                     connectTimeout = 20_000; readTimeout = 240_000
-                    setRequestProperty("User-Agent", "Mafari-EngineManager")
+                    setRequestProperty("User-Agent", "Mula-EngineManager")
                 }
                 val total = connection.contentLengthLong
                 connection.getInputStream().use { input ->
@@ -87,7 +87,7 @@ class GeckoPluginManager(context: Context) {
     private fun fetchChecksum(url: String): String {
         val connection = URL("$url.sha256").openConnection().apply {
             connectTimeout = 15_000; readTimeout = 20_000
-            setRequestProperty("User-Agent", "Mafari-EngineManager")
+            setRequestProperty("User-Agent", "Mula-EngineManager")
         }
         val body = connection.getInputStream().bufferedReader().use { it.readText() }
         return Regex("(?i)\\b[0-9a-f]{64}\\b").find(body)?.value

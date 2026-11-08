@@ -138,7 +138,7 @@ fun BookmarksHistoryScreen(
                 navigationIcon = { GlassBackButton(backdrop = backdrop, onClick = onBack) },
                 actions = {
                     if (selectedTab == 0) {
-                        IconButton(onClick = { exportPicker.launch("mafari-bookmarks.html") }) {
+                        IconButton(onClick = { exportPicker.launch("mula-bookmarks.html") }) {
                             Text("导出", fontSize = 13.sp, color = MiuixTheme.colorScheme.primary)
                         }
                     } else if (history.items.isNotEmpty()) {
@@ -174,7 +174,7 @@ fun BookmarksHistoryScreen(
                 showActions = false; importPicker.launch(arrayOf("text/html", "application/xhtml+xml", "text/plain"))
             }.padding(16.dp), color = MiuixTheme.colorScheme.onSurface)
             Text("导出书签", Modifier.fillMaxWidth().clickable {
-                showActions = false; exportPicker.launch("mafari-bookmarks.html")
+                showActions = false; exportPicker.launch("mula-bookmarks.html")
             }.padding(16.dp), color = MiuixTheme.colorScheme.onSurface)
         }
     }

@@ -1,5 +1,5 @@
 
-name: Build & Release Mafari
+name: Build & Release Mula
 
 on:
   push:
@@ -42,17 +42,16 @@ jobs:
           set -e
           SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager | head -1)
           yes | "$SDKMANAGER" --licenses >/dev/null || true
-          "$SDKMANAGER" --channel=3 \
+          "$SDKMANAGER" \
             "platform-tools" \
-            "platforms;android-37.0" \
+            "platforms;android-37" \
             "build-tools;36.0.0"
-          test -d "$ANDROID_HOME/platforms/android-37.0"
 
       - name: Prepare signing key
         if: env.KEYSTORE_BASE64 != ''
         run: |
-          echo "$KEYSTORE_BASE64" | base64 --decode > mafari-release.jks
-          test -s mafari-release.jks
+          echo "$KEYSTORE_BASE64" | base64 --decode > mula-release.jks
+          test -s mula-release.jks
 
       - name: Build Servo plugin
         run: |
@@ -85,13 +84,13 @@ jobs:
           sha256sum gecko-engine.apk > gecko-engine.apk.sha256
           cd ..
 
-      - name: Build Mafari release
+      - name: Build Mula release
         if: env.KEYSTORE_BASE64 != ''
         env:
-          MAFARI_KEYSTORE: mafari-release.jks
-          MAFARI_STORE_PASS: ${{ secrets.STORE_PASSWORD }}
-          MAFARI_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          MAFARI_KEY_PASS: ${{ secrets.KEY_PASSWORD }}
+          MULA_KEYSTORE: mula-release.jks
+          MULA_STORE_PASS: ${{ secrets.STORE_PASSWORD }}
+          MULA_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          MULA_KEY_PASS: ${{ secrets.KEY_PASSWORD }}
         run: |
           set -e
           gradle :app:assembleRelease --no-daemon --stacktrace
@@ -103,9 +102,9 @@ jobs:
           test -s "$APK"
 
           mkdir -p dist
-          cp "$APK" dist/mafari.apk
+          cp "$APK" dist/mula.apk
 
-      - name: Build Mafari debug
+      - name: Build Mula debug
         if: env.KEYSTORE_BASE64 == ''
         run: |
           set -e
@@ -118,7 +117,7 @@ jobs:
           test -s "$APK"
 
           mkdir -p dist
-          cp "$APK" dist/mafari-debug.apk
+          cp "$APK" dist/mula-debug.apk
 
       - name: Verify release files
         run: |
@@ -131,12 +130,12 @@ jobs:
           test -s dist/gecko-engine.apk
           test -s dist/gecko-engine.apk.sha256
 
-          if [ -f dist/mafari.apk ]; then
-            test -s dist/mafari.apk
-          elif [ -f dist/mafari-debug.apk ]; then
-            test -s dist/mafari-debug.apk
+          if [ -f dist/mula.apk ]; then
+            test -s dist/mula.apk
+          elif [ -f dist/mula-debug.apk ]; then
+            test -s dist/mula-debug.apk
           else
-            echo "ERROR: Mafari APK missing"
+            echo "ERROR: Mula APK missing"
             exit 1
           fi
 
@@ -146,7 +145,7 @@ jobs:
       - name: Upload workflow artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: mafari-build-${{ github.ref_name }}
+          name: mula-build-${{ github.ref_name }}
           path: dist/*
           if-no-files-found: error
           retention-days: 14
@@ -156,7 +155,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          name: Mafari ${{ github.ref_name }}
+          name: Mula ${{ github.ref_name }}
           files: |
             dist/*
           fail_on_unmatched_files: true

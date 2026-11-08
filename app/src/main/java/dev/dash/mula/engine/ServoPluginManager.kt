@@ -36,7 +36,7 @@ class ServoPluginManager(context: Context) {
         try {
             val connection = URL(apkUrl).openConnection().apply {
                 connectTimeout = 20_000; readTimeout = 180_000
-                setRequestProperty("User-Agent", "Mafari-EngineManager")
+                setRequestProperty("User-Agent", "Mula-EngineManager")
             }
             val total = connection.contentLengthLong
             connection.getInputStream().use { input ->
@@ -84,7 +84,7 @@ class ServoPluginManager(context: Context) {
         val connection = URL(checksumUrl).openConnection().apply {
             connectTimeout = 15_000
             readTimeout = 20_000
-            setRequestProperty("User-Agent", "Mafari-EngineManager")
+            setRequestProperty("User-Agent", "Mula-EngineManager")
         }
         val body = connection.getInputStream().bufferedReader().use { it.readText() }
         return Regex("(?i)\\b[0-9a-f]{64}\\b").find(body)?.value

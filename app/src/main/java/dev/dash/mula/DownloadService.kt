@@ -267,7 +267,7 @@ class DownloadService : Service() {
     }
 
     companion object {
-        const val CHANNEL_ID = "mafari_download"
+        const val CHANNEL_ID = "mula_download"
         const val NOTIFICATION_ID = 4201
         @Volatile
         var instance: DownloadService? = null

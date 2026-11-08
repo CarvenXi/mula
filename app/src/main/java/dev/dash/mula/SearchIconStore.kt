@@ -42,7 +42,7 @@ object SearchIconStore {
                 connectTimeout = 5000
                 readTimeout = 5000
                 instanceFollowRedirects = true
-                setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android) mafari")
+                setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android) mula")
             }
             try {
                 if (connection.responseCode !in 200..299) {

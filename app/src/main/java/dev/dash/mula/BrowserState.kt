@@ -174,7 +174,7 @@ class BrowserTab(private val appContext: Context, initialEngine: BrowserEngineTy
         runCatching {
             webView.addJavascriptInterface(
                 GmBridge(appContext, { webView }, { target -> onOpenNewTab?.invoke(target) }),
-                "MafariGM",
+                "MulaGM",
             )
         }
         webView.settings.apply {
@@ -258,7 +258,7 @@ class BrowserTab(private val appContext: Context, initialEngine: BrowserEngineTy
             }
         }
 
-        webView.addJavascriptInterface(elementBridge, "MafariElement")
+        webView.addJavascriptInterface(elementBridge, "MulaElement")
 
         webView.webChromeClient = object : WebChromeClient() {
             override fun onProgressChanged(view: WebView, newProgress: Int) {
@@ -333,8 +333,8 @@ class BrowserTab(private val appContext: Context, initialEngine: BrowserEngineTy
     private fun installElementInspector(view: WebView) {
         if (!pageEnhancements) return
         val js = """(function(){
-  if (window.__mafariInspector) return;
-  window.__mafariInspector = true;
+  if (window.__mulaInspector) return;
+  window.__mulaInspector = true;
   function selectorOf(el){
     try {
       if (el.id) return '#' + CSS.escape(el.id);
@@ -366,7 +366,7 @@ class BrowserTab(private val appContext: Context, initialEngine: BrowserEngineTy
     if (!isAdLike(el)) return;
     var img = el.querySelector ? el.querySelector('img') : null;
     var src = img ? (img.currentSrc || img.src || '') : '';
-    try { MafariElement.onElement(selectorOf(el), tag, src); } catch (e) {}
+    try { MulaElement.onElement(selectorOf(el), tag, src); } catch (e) {}
     try { var sel = getSelection(); if (sel) sel.removeAllRanges(); } catch (e) {}
   }
   var timer = null, sx = 0, sy = 0, moved = false;

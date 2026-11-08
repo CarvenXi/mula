@@ -45,7 +45,7 @@ fun parseUserScript(code: String): Triple<String, String, String> {
 
 class ExtensionStore(context: Context) {
 
-    private val prefs = context.getSharedPreferences("mafari_ext", Context.MODE_PRIVATE)
+    private val prefs = context.getSharedPreferences("mula_ext", Context.MODE_PRIVATE)
 
     val items = mutableStateListOf<UserScript>().apply { addAll(load()) }
 

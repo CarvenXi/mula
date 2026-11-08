@@ -16,7 +16,7 @@ const val ADBLOCK_SCRIPT_NAME = "全网查询去广告规则集"
 private val ADBLOCK_RULES_JS = """
 // ==UserScript==
 // @name         全网查询去广告规则集
-// @namespace    mafari.builtin
+// @namespace    mula.builtin
 // @version      1.0.0
 // @description  通用广告位与弹窗清理规则，按选择器隐藏常见广告容器
 // @match        *://*/*
@@ -25,8 +25,8 @@ private val ADBLOCK_RULES_JS = """
 // ==/UserScript==
 (function () {
   'use strict';
-  if (window.__mafariAdRules) return;
-  window.__mafariAdRules = true;
+  if (window.__mulaAdRules) return;
+  window.__mulaAdRules = true;
 
   var SELECTORS = [
     '.adsbygoogle',
@@ -57,8 +57,8 @@ private val ADBLOCK_RULES_JS = """
       for (var j = 0; j < list.length; j++) {
         var el = list[j];
         if (!el) continue;
-        if (el.dataset && el.dataset.mafariAdHidden) continue;
-        if (el.dataset) el.dataset.mafariAdHidden = '1';
+        if (el.dataset && el.dataset.mulaAdHidden) continue;
+        if (el.dataset) el.dataset.mulaAdHidden = '1';
         el.style.setProperty('display', 'none', 'important');
         el.style.setProperty('visibility', 'hidden', 'important');
       }

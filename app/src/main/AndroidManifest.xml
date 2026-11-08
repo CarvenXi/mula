@@ -15,7 +15,7 @@
         android:largeHeap="true"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MiuixBrowser"
+        android:theme="@style/Theme.Mula"
         android:usesCleartextTraffic="true">
 
         <activity
@@ -24,7 +24,7 @@
             android:launchMode="singleTask"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden|keyboard|uiMode|density|fontScale"
             android:windowSoftInputMode="adjustResize"
-            android:theme="@style/Theme.MiuixBrowser">
+            android:theme="@style/Theme.Mula">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

@@ -41,7 +41,7 @@ enum class MenuAction(val id: String, val label: String, val icon: ImageVector) 
 /** 更多面板的图标顺序，可拖动排序并持久化 */
 class MenuOrderStore(context: Context) {
 
-    private val prefs = context.getSharedPreferences("mafari_menu", Context.MODE_PRIVATE)
+    private val prefs = context.getSharedPreferences("mula_menu", Context.MODE_PRIVATE)
 
     val order = mutableStateListOf<MenuAction>()
 

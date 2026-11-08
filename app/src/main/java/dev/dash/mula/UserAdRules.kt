@@ -5,7 +5,7 @@ import android.content.Context
 /** 用户手动「标记为广告」的隐藏规则，按域名持久化，下次访问同站自动注入。 */
 object UserAdRules {
 
-    private const val PREFS = "mafari_ad_rules"
+    private const val PREFS = "mula_ad_rules"
 
     fun selectors(context: Context, host: String): List<String> {
         if (host.isBlank()) return emptyList()

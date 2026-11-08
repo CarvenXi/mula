@@ -76,7 +76,7 @@ class GmBridge(
                 text = e.message ?: "request failed"
             }
             val payload = JSONObject.quote(text)
-            val js = "window.__mafariXhrDone && window.__mafariXhrDone(" +
+            val js = "window.__mulaXhrDone && window.__mulaXhrDone(" +
                 "${JSONObject.quote(reqId)}, $status, $payload, ${JSONObject.quote(finalUrl)})"
             webViewProvider()?.post {
                 runCatching { webViewProvider()?.evaluateJavascript(js, null) }

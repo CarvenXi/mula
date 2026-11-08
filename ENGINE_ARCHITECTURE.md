@@ -1,4 +1,4 @@
-# Mafari 多内核架构
+# Mula 多内核架构
 
 ## 当前实现
 
@@ -10,7 +10,7 @@
 
 ## 能力边界
 
-WebView 当前支持 Mafari 的用户脚本、下载接管、UA、页内查找、页面元素检查和下拉刷新。Servo AAR 当前只提供基础导航与渲染，因此其 `EngineCapabilities` 对应能力明确标记为不支持。调用方必须检查能力，不应把 WebView 专属功能伪装成 Servo 已支持。
+WebView 当前支持 Mula 的用户脚本、下载接管、UA、页内查找、页面元素检查和下拉刷新。Servo AAR 当前只提供基础导航与渲染，因此其 `EngineCapabilities` 对应能力明确标记为不支持。调用方必须检查能力，不应把 WebView 专属功能伪装成 Servo 已支持。
 
 ## 添加新内核
 
@@ -46,6 +46,6 @@ The main `:app` module must not depend on Servo AAR. Servo is packaged by the in
 
 - `:gecko-engine-plugin` packages the official Mozilla GeckoView Stable AAR into a standalone APK. The main `:app` module has no GeckoView dependency.
 - The plugin APK is downloaded only after the user selects GeckoView; `GeckoPluginManager` validates the APK structure and SHA-256, extracts ABI native libraries, and creates a resource-aware plugin Context plus a shared `DexClassLoader`.
-- `DynamicGeckoEngineAdapter` calls the plugin entry point reflectively. Each Mafari tab owns one `GeckoSession`; all sessions share one process-wide `GeckoRuntime` inside the plugin classloader.
+- `DynamicGeckoEngineAdapter` calls the plugin entry point reflectively. Each Mula tab owns one `GeckoSession`; all sessions share one process-wide `GeckoRuntime` inside the plugin classloader.
 - GeckoView currently exposes core navigation, title, URL, loading progress, and history state. WebView-only script injection, download interception, element inspection, and custom UA remain explicitly unsupported until their Gecko APIs are implemented.
 - GeckoView is built against Mozilla's published Stable artifact; override with `-PgeckoViewVersion=<version>` when updating the plugin.

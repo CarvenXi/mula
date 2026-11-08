@@ -849,7 +849,7 @@ fun BrowserScreen(
                         val ok = Downloader.saveDataUri(context, imageUrl, name)
                         android.widget.Toast.makeText(
                             context,
-                            if (ok) "已保存到 Download/mafari" else "保存失败",
+                            if (ok) "已保存到 Download/mula" else "保存失败",
                             android.widget.Toast.LENGTH_SHORT,
                         ).show()
                     } else {
@@ -962,7 +962,7 @@ fun BrowserScreen(
             OverlayDialog(
                 show = true,
                 title = "下载文件",
-                summary = request.fileName + "\n保存到 /sdcard/Download/mafari",
+                summary = request.fileName + "\n保存到 /sdcard/Download/mula",
                 onDismissRequest = { pendingDownload = null },
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
@@ -1772,7 +1772,7 @@ private fun StartPage(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            GlassLogoText("Mafari", fontSize = 58)
+            GlassLogoText("Mula", fontSize = 58)
         }
         Spacer(Modifier.height(30.dp))
 
@@ -2300,7 +2300,7 @@ private fun fetchRemoteScript(url: String): String? = runCatching {
     val connection = (java.net.URL(url).openConnection() as java.net.HttpURLConnection).apply {
         connectTimeout = 8000
         readTimeout = 8000
-        setRequestProperty("User-Agent", "Mozilla/5.0 mafari")
+        setRequestProperty("User-Agent", "Mozilla/5.0 mula")
     }
     try {
         if (connection.responseCode !in 200..299) return@runCatching null

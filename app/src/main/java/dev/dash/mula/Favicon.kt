@@ -47,7 +47,7 @@ object FaviconLoader {
             connectTimeout = 4000
             readTimeout = 4000
             instanceFollowRedirects = true
-            setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android) mafari")
+            setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android) mula")
         }
         return try {
             if (connection.responseCode !in 200..299) {
@@ -88,7 +88,7 @@ object RemoteIconLoader {
                 connectTimeout = 4000
                 readTimeout = 4000
                 instanceFollowRedirects = true
-                setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android) mafari")
+                setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android) mula")
             }
             try {
                 if (connection.responseCode !in 200..299) {
