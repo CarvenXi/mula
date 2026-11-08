@@ -47,8 +47,6 @@ jobs:
             "platforms;android-37.0" \
             "build-tools;36.0.0"
           test -d "$ANDROID_HOME/platforms/android-37.0"
-test -d "$ANDROID_HOME/build-tools/36.0.0"
-test -d "$ANDROID_HOME/platform-tools"
 
       - name: Prepare signing key
         if: env.KEYSTORE_BASE64 != ''
