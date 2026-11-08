@@ -161,8 +161,11 @@ jobs:
             echo "ERROR: Mula APK missing"
             exit 1
           fi
-          sha256sum -c dist/servo-engine.apk.sha256
-          sha256sum -c dist/gecko-engine.apk.sha256
+          (
+            cd dist
+            sha256sum -c servo-engine.apk.sha256
+            sha256sum -c gecko-engine.apk.sha256
+          )
 
       - name: Upload workflow artifacts
         uses: actions/upload-artifact@v4
