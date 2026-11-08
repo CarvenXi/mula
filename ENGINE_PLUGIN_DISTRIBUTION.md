@@ -38,3 +38,8 @@ GitHub Actions 会自动构建并发布 Servo 插件：
 - 当前插件构建面向 `arm64-v8a` / `armeabi-v7a`，最终可用 ABI 取决于 Servo AAR 实际包含的 JNI 库。
 - Android 动态代码加载受平台安全策略约束。插件只能来自可信发布源；不要允许用户任意导入 APK/JAR。
 - Servo AAR 的构造函数与回调 API 仍需用目标 Servo release 实机验证。反射适配器刻意隔离 API，但无法替代真实设备测试。
+
+
+## GeckoView plugin
+
+The independent `:gecko-engine-plugin` application module packages `org.mozilla.geckoview:geckoview-stable` (default version `157.0.20260910085851`) into `gecko-engine.apk`. Release workflows publish `gecko-engine.apk` and `gecko-engine.apk.sha256`. Mafari downloads it lazily from the latest release after GeckoView is selected. Unlike a plain DEX plugin, GeckoView also needs its compiled Android resources/assets and native libraries; `GeckoPluginManager` therefore mounts the plugin APK resources into a plugin Context and extracts ABI libraries before reflective initialization.

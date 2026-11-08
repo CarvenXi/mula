@@ -160,13 +160,21 @@ fun BrowserScreen(
         )
     }
     LaunchedEffect(settings.browserEngine) {
-        val target = if (settings.browserEngine == 1) BrowserEngineType.SERVO else BrowserEngineType.WEBVIEW
-        val switched = runCatching { state.switchEngine(target) }.isSuccess
-        if (!switched && settings.browserEngine == 1) {
+        val target = when (settings.browserEngine) { 1 -> BrowserEngineType.SERVO; 2 -> BrowserEngineType.GECKO; else -> BrowserEngineType.WEBVIEW }
+        val switched = runCatching {
+            if (target == BrowserEngineType.GECKO) {
+                withContext(kotlinx.coroutines.Dispatchers.IO) {
+                    dev.dsh.miuixbrowser.engine.GeckoPluginManager(context).prepare()
+                }
+            }
+            state.switchEngine(target)
+        }.isSuccess
+        if (!switched && settings.browserEngine != 0) {
+            val failedEngine = if (settings.browserEngine == 1) "Servo" else "GeckoView"
             settings.updateBrowserEngine(0)
-            android.widget.Toast.makeText(context, "Servo 内核加载失败，已回退到 WebView", android.widget.Toast.LENGTH_LONG).show()
+            android.widget.Toast.makeText(context, "$failedEngine 内核加载失败，已回退到 WebView", android.widget.Toast.LENGTH_LONG).show()
         }
-        if (settings.browserEngine == 1 && settings.pageEnhancements) settings.updatePageEnhancements(false)
+        if (settings.browserEngine != 0 && settings.pageEnhancements) settings.updatePageEnhancements(false)
     }
     LaunchedEffect(settings.pageEnhancements, settings.browserEngine, state.tabs.size) {
         val enabled = settings.browserEngine == 0 && settings.pageEnhancements
@@ -325,7 +333,7 @@ fun BrowserScreen(
         var lastShow = 0
         while (true) {
             runCatching {
-                if (tab.engine == BrowserEngineType.SERVO) {
+                if (tab.engine != BrowserEngineType.WEBVIEW) {
                     tab.refreshNavigationState()
                     barHidden = false
                 } else {

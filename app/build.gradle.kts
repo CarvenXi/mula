@@ -16,6 +16,9 @@ plugins {
 val servoPluginUrl = providers.gradleProperty("servoPluginUrl")
     .orElse("https://github.com/CarvenXi/mafari/releases/latest/download/servo-engine.apk")
 val servoPluginSha256 = providers.gradleProperty("servoPluginSha256").orElse("")
+val geckoPluginUrl = providers.gradleProperty("geckoPluginUrl")
+    .orElse("https://github.com/CarvenXi/mafari/releases/latest/download/gecko-engine.apk")
+val geckoPluginSha256 = providers.gradleProperty("geckoPluginSha256").orElse("")
 
 android {
     namespace = "dev.dsh.miuixbrowser"
@@ -30,10 +33,12 @@ android {
         applicationId = "dev.dsh.miuixbrowser"
         minSdk = 33
         targetSdk = 36
-        versionCode = 123
-        versionName = "v1.2.1-Multi_core"
+        versionCode = 130
+        versionName = "v1.3.0"
         buildConfigField("String", "SERVO_PLUGIN_APK_URL", "\"${servoPluginUrl.get()}\"")
         buildConfigField("String", "SERVO_PLUGIN_SHA256", "\"${servoPluginSha256.get()}\"")
+        buildConfigField("String", "GECKO_PLUGIN_APK_URL", "\"${geckoPluginUrl.get()}\"")
+        buildConfigField("String", "GECKO_PLUGIN_SHA256", "\"${geckoPluginSha256.get()}\"")
     }
 
     buildFeatures {

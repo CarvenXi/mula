@@ -91,9 +91,10 @@ fun SettingsScreen(
     val engineScope = rememberCoroutineScope()
     var engineDownloadState by remember { mutableStateOf("") }
     val servoManager = remember { dev.dsh.miuixbrowser.engine.ServoPluginManager(context) }
+    val geckoManager = remember { dev.dsh.miuixbrowser.engine.GeckoPluginManager(context) }
     // Servo 暂不支持 Mafari 的页面增强能力，切换到 Servo 后持久化关闭。
     LaunchedEffect(settings.browserEngine) {
-        if (settings.browserEngine == 1 && settings.pageEnhancements) {
+        if (settings.browserEngine != 0 && settings.pageEnhancements) {
             settings.updatePageEnhancements(false)
         }
     }
@@ -224,30 +225,44 @@ fun SettingsScreen(
                     )
                     OverlayDropdownPreference(
                         title = "浏览器内核",
-                        items = listOf("Android WebView", "Servo（实验性）"),
+                        items = listOf("Android WebView", "Servo（实验性）", "GeckoView（实验性）"),
                         selectedIndex = settings.browserEngine,
                         onSelectedIndexChange = { selected ->
                             if (selected == 0) {
                                 settings.updateBrowserEngine(0)
                                 engineDownloadState = ""
-                            } else if (servoManager.isInstalled()) {
-                                settings.updateBrowserEngine(1)
-                                settings.updatePageEnhancements(false)
-                            } else {
-                                engineScope.launch {
+                            } else if (selected == 1) {
+                                if (servoManager.isInstalled()) {
+                                    settings.updateBrowserEngine(1)
+                                    settings.updatePageEnhancements(false)
+                                } else engineScope.launch {
                                     val url = BuildConfig.SERVO_PLUGIN_APK_URL
                                     val sha = BuildConfig.SERVO_PLUGIN_SHA256
-                                    if (url.isBlank()) {
-                                        engineDownloadState = "Servo 插件发布地址未配置"
-                                    } else {
+                                    if (url.isBlank()) engineDownloadState = "Servo 插件发布地址未配置" else {
                                         engineDownloadState = "正在下载 Servo 内核…"
                                         runCatching { servoManager.install(url, sha) }
-                                            .onSuccess {
-                                                settings.updateBrowserEngine(1)
-                                                settings.updatePageEnhancements(false)
-                                                engineDownloadState = "Servo 内核已安装"
-                                            }
+                                            .onSuccess { settings.updateBrowserEngine(1); settings.updatePageEnhancements(false); engineDownloadState = "Servo 内核已安装" }
                                             .onFailure { engineDownloadState = "下载失败：${it.message ?: "未知错误"}" }
+                                    }
+                                }
+                            } else if (selected == 2) {
+                                engineScope.launch {
+                                    val url = BuildConfig.GECKO_PLUGIN_APK_URL
+                                    val sha = BuildConfig.GECKO_PLUGIN_SHA256
+                                    if (!geckoManager.isInstalled() && url.isBlank()) {
+                                        engineDownloadState = "GeckoView 插件发布地址未配置"
+                                    } else {
+                                        engineDownloadState = if (geckoManager.isInstalled()) "正在准备 GeckoView 内核…" else "正在下载 GeckoView 内核…"
+                                        runCatching {
+                                            if (!geckoManager.isInstalled()) geckoManager.install(url, sha)
+                                            geckoManager.prepare()
+                                        }
+                                            .onSuccess {
+                                                settings.updateBrowserEngine(2)
+                                                settings.updatePageEnhancements(false)
+                                                engineDownloadState = "GeckoView 内核已就绪"
+                                            }
+                                            .onFailure { engineDownloadState = "准备失败：${it.message ?: "未知错误"}" }
                                     }
                                 }
                             }
@@ -278,8 +293,24 @@ fun SettingsScreen(
                             }
                         },
                     )
-                    if (settings.browserEngine == 1) {
-                        // 用纯展示行替代开关，避免 Servo 模式下用户误以为可以开启。
+                    SettingsRow(
+                        title = "GeckoView 内核管理",
+                        summary = if (geckoManager.isInstalled()) "已安装 · ${(geckoManager.installedSize() / (1024 * 1024))} MB · 点击重新下载/更新" else "未安装 · 首次选择 GeckoView 时按需下载",
+                        onClick = {
+                            engineScope.launch {
+                                val url = BuildConfig.GECKO_PLUGIN_APK_URL
+                                val sha = BuildConfig.GECKO_PLUGIN_SHA256
+                                if (url.isBlank()) engineDownloadState = "GeckoView 插件发布地址未配置" else {
+                                    engineDownloadState = "正在下载/更新 GeckoView 内核…"
+                                    runCatching { geckoManager.install(url, sha) }
+                                        .onSuccess { engineDownloadState = "GeckoView 内核已更新，重启 Mafari 后生效" }
+                                        .onFailure { engineDownloadState = "更新失败：${it.message ?: "未知错误"}" }
+                                }
+                            }
+                        },
+                    )
+                    if (settings.browserEngine != 0) {
+                        // 非 WebView 内核暂不支持 Mafari 页面增强，避免显示可用开关。
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -292,7 +323,7 @@ fun SettingsScreen(
                             )
                             Spacer(Modifier.height(4.dp))
                             Text(
-                                text = "Servo 内核暂不支持，已自动关闭",
+                                text = if (settings.browserEngine == 1) "Servo 内核暂不支持，已自动关闭" else "GeckoView 内核暂不支持，已自动关闭",
                                 fontSize = 12.sp,
                                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                             )

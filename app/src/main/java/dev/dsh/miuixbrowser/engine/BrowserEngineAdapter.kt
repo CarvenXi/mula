@@ -69,7 +69,7 @@ class WebViewEngineAdapter(private val webView: WebView) : BrowserEngineAdapter 
     }
 }
 
-/** 集中创建内核适配器；新增内核时只需在此注册，不让 UI 知道具体实现。 */
+/** 集中创建内核适配器；新增内核时通过 BrowserTab 的插件适配层接入，不让 UI 知道具体实现。 */
 object BrowserEngineFactory {
     fun webView(view: WebView): BrowserEngineAdapter = WebViewEngineAdapter(view)
 }

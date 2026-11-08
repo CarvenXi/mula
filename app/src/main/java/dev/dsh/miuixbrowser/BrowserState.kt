@@ -26,6 +26,8 @@ import dev.dsh.miuixbrowser.engine.BrowserEngineAdapter
 import dev.dsh.miuixbrowser.engine.BrowserEngineFactory
 import dev.dsh.miuixbrowser.engine.DynamicServoEngineAdapter
 import dev.dsh.miuixbrowser.engine.ServoPluginManager
+import dev.dsh.miuixbrowser.engine.GeckoPluginManager
+import dev.dsh.miuixbrowser.engine.DynamicGeckoEngineAdapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -57,7 +59,7 @@ fun hostOf(url: String): String {
     return if (!host.isNullOrBlank()) host else trimmed.take(48)
 }
 
-enum class BrowserEngineType { WEBVIEW, SERVO }
+enum class BrowserEngineType { WEBVIEW, SERVO, GECKO }
 
 /** 一个标签页：保留 WebView，并按需创建 ServoView。 */
 @SuppressLint("SetJavaScriptEnabled")
@@ -81,7 +83,11 @@ class BrowserTab(private val appContext: Context, initialEngine: BrowserEngineTy
     private var servoScope: CoroutineScope? = null
     var servoView: View? = null
         private set
+    private var geckoAdapter: BrowserEngineAdapter? = null
+    var geckoView: View? = null
+        private set
     private val servoPluginManager = ServoPluginManager(appContext)
+    private val geckoPluginManager = GeckoPluginManager(appContext)
 
     private lateinit var engineAdapter: BrowserEngineAdapter
 
@@ -453,7 +459,7 @@ class BrowserTab(private val appContext: Context, initialEngine: BrowserEngineTy
     fun refreshNavigationState() = syncNav()
 
     private fun syncNav() {
-        if (engine == BrowserEngineType.SERVO) {
+        if (engine != BrowserEngineType.WEBVIEW) {
             canGoBack = engineAdapter.canGoBack() || fromHome ||
                 (url.isEmpty() && savedUrl.isNotBlank())
             canGoForward = engineAdapter.canGoForward()
@@ -505,18 +511,51 @@ class BrowserTab(private val appContext: Context, initialEngine: BrowserEngineTy
         engineAdapter = adapter
     }
 
+    private fun createGeckoView(initialUri: String) {
+        if (geckoView != null && geckoAdapter != null) {
+            engineAdapter = geckoAdapter!!
+            return
+        }
+        check(geckoPluginManager.isInstalled()) { "GeckoView 内核尚未安装，请先在设置中下载引擎包" }
+        val adapter = DynamicGeckoEngineAdapter.create(
+            appContext,
+            geckoPluginManager,
+            initialUri,
+        ) { event, value ->
+            when (event) {
+                "onPageStart" -> { loading = true; progress = 0f; errorText = null }
+                "onPageStop" -> { loading = false; progress = 1f; syncNav(); onVisited?.invoke(url, title) }
+                "onProgress" -> progress = (value?.toFloatOrNull() ?: 0f).coerceIn(0f, 100f) / 100f
+                "onTitle" -> value?.takeIf { it.isNotBlank() }?.let { title = it }
+                "onUrl" -> value?.let { url = it; syncNav() }
+                "onCanGoBack" -> { canGoBack = value == "true" }
+                "onCanGoForward" -> { canGoForward = value == "true" }
+            }
+        }
+        geckoAdapter = adapter
+        geckoView = adapter.view
+        engineAdapter = adapter
+    }
+
     fun switchEngine(target: BrowserEngineType) {
         if (engine == target) return
         val currentUrl = url
         engine = target
-        if (target == BrowserEngineType.SERVO) {
-            webView.onPause()
-            createServoView(currentUrl.ifBlank { "about:blank" })
-        } else {
-            webView.onResume()
-            engineAdapter = webViewAdapter
-            applyUserAgent()
-            if (currentUrl.isNotBlank()) engineAdapter.load(currentUrl)
+        when (target) {
+            BrowserEngineType.SERVO -> {
+                webView.onPause()
+                createServoView(currentUrl.ifBlank { "about:blank" })
+            }
+            BrowserEngineType.GECKO -> {
+                webView.onPause()
+                createGeckoView(currentUrl.ifBlank { "about:blank" })
+            }
+            BrowserEngineType.WEBVIEW -> {
+                webView.onResume()
+                engineAdapter = webViewAdapter
+                applyUserAgent()
+                if (currentUrl.isNotBlank()) engineAdapter.load(currentUrl)
+            }
         }
         syncNav()
     }
@@ -525,22 +564,20 @@ class BrowserTab(private val appContext: Context, initialEngine: BrowserEngineTy
         val target = toUrl(input, searchTemplate)
         if (url.isEmpty()) fromHome = true
         url = target
-        if (engine == BrowserEngineType.SERVO) {
-            createServoView("about:blank")
-            engineAdapter.load(target)
-        } else {
-            engineAdapter.load(target)
+        when (engine) {
+            BrowserEngineType.SERVO -> { createServoView("about:blank"); engineAdapter.load(target) }
+            BrowserEngineType.GECKO -> { createGeckoView("about:blank"); engineAdapter.load(target) }
+            BrowserEngineType.WEBVIEW -> engineAdapter.load(target)
         }
         syncNav()
     }
 
     fun loadUrl(raw: String) {
         url = raw
-        if (engine == BrowserEngineType.SERVO) {
-            createServoView("about:blank")
-            engineAdapter.load(raw)
-        } else {
-            engineAdapter.load(raw)
+        when (engine) {
+            BrowserEngineType.SERVO -> { createServoView("about:blank"); engineAdapter.load(raw) }
+            BrowserEngineType.GECKO -> { createGeckoView("about:blank"); engineAdapter.load(raw) }
+            BrowserEngineType.WEBVIEW -> engineAdapter.load(raw)
         }
     }
 
@@ -629,23 +666,27 @@ class BrowserTab(private val appContext: Context, initialEngine: BrowserEngineTy
         if (destroyed) return
         destroyed = true
         runCatching { (servoView?.parent as? ViewGroup)?.removeView(servoView) }
+        runCatching { (geckoView?.parent as? ViewGroup)?.removeView(geckoView) }
         runCatching { (webView.parent as? ViewGroup)?.removeView(webView) }
         // 每个内核适配器负责释放自己的底层资源，标签不再重复实现内核销毁细节。
         runCatching { servoAdapter?.destroy() }
+        runCatching { geckoAdapter?.destroy() }
         runCatching { webViewAdapter.destroy() }
         servoScope?.cancel()
         servoAdapter = null
         servoView = null
+        geckoAdapter = null
+        geckoView = null
     }
 
     /** 关闭标签：等界面把 WebView 从视图树摘下来后再销毁。 */
     fun close() {
         closed = true
         webView.post {
-            if (webView.parent == null && (servoView?.parent == null)) destroyNow()
+            if (webView.parent == null && (servoView?.parent == null) && (geckoView?.parent == null)) destroyNow()
         }
         servoView?.post {
-            if (servoView?.parent == null && webView.parent == null) destroyNow()
+            if (servoView?.parent == null && geckoView?.parent == null && webView.parent == null) destroyNow()
         }
     }
 

@@ -1,0 +1,30 @@
+plugins {
+    id("com.android.application")
+}
+
+val geckoViewVersion = providers.gradleProperty("geckoViewVersion").orElse("157.0.20260910085851")
+
+android {
+    namespace = "dev.dsh.miuixbrowser.geckoplugin"
+    compileSdk = 37
+    defaultConfig {
+        applicationId = "dev.dsh.miuixbrowser.geckoplugin"
+        minSdk = 26
+        targetSdk = 36
+        versionCode = 1
+        versionName = geckoViewVersion.get()
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    buildTypes { release { isMinifyEnabled = false } }
+    packaging {
+        jniLibs { useLegacyPackaging = false }
+        resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" }
+    }
+}
+
+dependencies {
+    implementation("org.mozilla.geckoview:geckoview-stable:${geckoViewVersion.get()}")
+}

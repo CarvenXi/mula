@@ -40,3 +40,12 @@ Servo AAR 在构建时从 Servo 官方 Release 下载，并校验 SHA-256。可�
 ## Runtime engine plugins (Phase 3)
 
 The main `:app` module must not depend on Servo AAR. Servo is packaged by the independent `:servo-engine-plugin` application module and delivered as a signed/hash-pinned APK payload. At runtime `ServoPluginManager` downloads that payload only after the user selects Servo, verifies SHA-256, extracts ABI-native libraries into app-private storage and loads DEX through `DexClassLoader`. `DynamicServoEngineAdapter` isolates Servo API access behind reflection; the Compose host only receives an Android `View`. See `ENGINE_PLUGIN_DISTRIBUTION.md` for the release pipeline.
+
+
+## GeckoView runtime plugin (Phase 4)
+
+- `:gecko-engine-plugin` packages the official Mozilla GeckoView Stable AAR into a standalone APK. The main `:app` module has no GeckoView dependency.
+- The plugin APK is downloaded only after the user selects GeckoView; `GeckoPluginManager` validates the APK structure and SHA-256, extracts ABI native libraries, and creates a resource-aware plugin Context plus a shared `DexClassLoader`.
+- `DynamicGeckoEngineAdapter` calls the plugin entry point reflectively. Each Mafari tab owns one `GeckoSession`; all sessions share one process-wide `GeckoRuntime` inside the plugin classloader.
+- GeckoView currently exposes core navigation, title, URL, loading progress, and history state. WebView-only script injection, download interception, element inspection, and custom UA remain explicitly unsupported until their Gecko APIs are implemented.
+- GeckoView is built against Mozilla's published Stable artifact; override with `-PgeckoViewVersion=<version>` when updating the plugin.

@@ -71,3 +71,8 @@ git tag v3.3.0 && git push origin v3.3.0
 ## 项目地址
 
 https://github.com/rosenii/mafari
+
+
+### Browser engines
+
+Mafari supports Android WebView, Servo (separate runtime plugin), and GeckoView (separate runtime plugin). Servo and GeckoView are downloaded on demand from GitHub Releases and are not bundled into the main APK.

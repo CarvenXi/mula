@@ -12,12 +12,12 @@ class AppSettings(context: Context) {
     var blurEnabled by mutableStateOf(prefs.getBoolean(KEY_BLUR, true))
         private set
 
-    /** Selected browser engine: 0=WebView, 1=Servo plugin. */
+    /** Selected browser engine: 0=WebView, 1=Servo plugin, 2=GeckoView plugin. */
     var browserEngine by mutableStateOf(prefs.getInt(KEY_ENGINE, 0))
         private set
 
     fun updateBrowserEngine(value: Int) {
-        browserEngine = value.coerceIn(0, 1)
+        browserEngine = value.coerceIn(0, 2)
         prefs.edit().putInt(KEY_ENGINE, browserEngine).apply()
     }
 
