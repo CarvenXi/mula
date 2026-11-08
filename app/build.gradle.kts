@@ -11,13 +11,13 @@ plugins {
 }
 
 // Servo engine is delivered as a separately built APK plugin. The main app has no Servo classes.
-// Default to the latest Servo plugin asset published with Mula GitHub Releases.
+// 插件由独立 workflow 发布到固定标签 `engine-plugins` 的 Release（与主应用版本 Release 分离）。
 // A SHA-256 may be supplied at build time; otherwise the app fetches the adjacent .sha256 file.
 val servoPluginUrl = providers.gradleProperty("servoPluginUrl")
-    .orElse("https://github.com/CarvenXi/mula/releases/latest/download/servo-engine.apk")
+    .orElse("https://github.com/CarvenXi/mula/releases/download/engine-plugins/servo-engine.apk")
 val servoPluginSha256 = providers.gradleProperty("servoPluginSha256").orElse("")
 val geckoPluginUrl = providers.gradleProperty("geckoPluginUrl")
-    .orElse("https://github.com/CarvenXi/mula/releases/latest/download/gecko-engine.apk")
+    .orElse("https://github.com/CarvenXi/mula/releases/download/engine-plugins/gecko-engine.apk")
 val geckoPluginSha256 = providers.gradleProperty("geckoPluginSha256").orElse("")
 
 android {
@@ -33,8 +33,8 @@ android {
         applicationId = "dev.dash.mula"
         minSdk = 33
         targetSdk = 37
-        versionCode = 151
-        versionName = "v1.5.1"
+        versionCode = 152
+        versionName = "v1.5.2"
         buildConfigField("String", "SERVO_PLUGIN_APK_URL", "\"${servoPluginUrl.get()}\"")
         buildConfigField("String", "SERVO_PLUGIN_SHA256", "\"${servoPluginSha256.get()}\"")
         buildConfigField("String", "GECKO_PLUGIN_APK_URL", "\"${geckoPluginUrl.get()}\"")
@@ -53,7 +53,7 @@ android {
 
     signingConfigs {
         val keystorePath = System.getenv("MULA_KEYSTORE")
-        if (keystorePath != null && rootProject.file(keystorePath).exists()) {
+        if (!keystorePath.isNullOrBlank() && rootProject.file(keystorePath).isFile) {
             create("release") {
                 storeFile = rootProject.file(keystorePath)
                 storePassword = System.getenv("MULA_STORE_PASS")

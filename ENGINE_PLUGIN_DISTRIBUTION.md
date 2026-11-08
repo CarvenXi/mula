@@ -11,7 +11,7 @@ GitHub Actions 会自动构建并发布 Servo 插件：
 - `:servo-engine-plugin:assembleRelease` 生成独立插件 APK。
 - 工作流复制为 `servo-engine.apk`，并生成 `servo-engine.apk.sha256`。
 - 推送 `v*` 标签时，两个文件会与 Mula APK 一起上传到 GitHub Release。
-- 主应用默认使用 `https://github.com/CarvenXi/mula/releases/latest/download/servo-engine.apk`。
+- 主应用默认使用 `https://github.com/CarvenXi/mula/releases/download/engine-plugins/servo-engine.apk`。
 - 安装时优先使用构建时注入的 `servoPluginSha256`；未注入时，自动读取同地址追加 `.sha256` 的校验文件。
 
 本地构建时仍可覆盖发布地址和固定校验值：

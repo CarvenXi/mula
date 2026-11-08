@@ -3,7 +3,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 ./gradlew :servo-engine-plugin:assembleRelease
-APK="$ROOT/servo-engine-plugin/build/outputs/apk/release/servo-engine-plugin-release-unsigned.apk"
+APK="$(find "$ROOT/servo-engine-plugin/build/outputs/apk/release" -name '*.apk' | head -1)"
 OUT="$ROOT/dist/servo-engine"
 mkdir -p "$OUT"
 cp "$APK" "$OUT/servo-engine.apk"

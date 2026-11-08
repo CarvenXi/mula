@@ -175,9 +175,9 @@ class GeckoPluginManager(context: Context) {
         return wrap(activityContext, pluginAppContext)
     }
 
-    private fun supportedAbi(): String = Build.SUPPORTED_ABIS.firstOrNull {
-        it == "arm64-v8a" || it == "armeabi-v7a" || it == "x86_64" || it == "x86"
-    } ?: error("当前设备 ABI 暂不受 GeckoView 插件支持")
+    /** GeckoView 插件只打包 arm64-v8a。 */
+    private fun supportedAbi(): String = Build.SUPPORTED_ABIS.firstOrNull { it == "arm64-v8a" }
+        ?: error("GeckoView 插件仅支持 arm64-v8a 设备")
 
     private fun ensureNativeLibraries(abi: String) {
         val fingerprint = "${activeApk.length()}:${activeApk.lastModified()}"

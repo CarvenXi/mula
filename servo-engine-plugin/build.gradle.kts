@@ -204,11 +204,49 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0.0"
+        // Servo 官方 AAR 只有 aarch64
+        ndk { abiFilters += "arm64-v8a" }
     }
-    buildTypes { release { isMinifyEnabled = false } }
+
+    // 签名：同 gecko-engine-plugin；没有 keystore 时回退 debug 签名，绝不输出未签名 APK
+    signingConfigs {
+        val keystorePath = System.getenv("MULA_KEYSTORE")
+        if (!keystorePath.isNullOrBlank() && rootProject.file(keystorePath).isFile) {
+            create("release") {
+                storeFile = rootProject.file(keystorePath)
+                storePassword = System.getenv("MULA_STORE_PASS")
+                keyAlias = System.getenv("MULA_KEY_ALIAS")
+                keyPassword = System.getenv("MULA_KEY_PASS")
+                enableV1Signing = true
+                enableV2Signing = true
+                enableV3Signing = true
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
+            isMinifyEnabled = true
+            isShrinkResources = false
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+    }
     packaging {
-        jniLibs { useLegacyPackaging = false }
-        resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" }
+        jniLibs {
+            // 宿主自行解压原生库，so 压缩存放以减小体积
+            useLegacyPackaging = true
+            excludes += setOf("lib/armeabi-v7a/**", "lib/x86/**", "lib/x86_64/**")
+        }
+        resources {
+            excludes += setOf(
+                "/META-INF/{AL2.0,LGPL2.1}",
+                "/META-INF/*.version",
+                "/META-INF/*.kotlin_module",
+                "/DebugProbesKt.bin",
+                "/kotlin-tooling-metadata.json",
+            )
+        }
     }
 }
 

@@ -62,6 +62,12 @@ git tag v3.3.0 && git push origin v3.3.0
 https://github.com/CarvenXi/mafari
 
 
+### CI / Release
+
+- `.github/workflows/app.yml`：只构建主应用；推 `v*` tag 发布版本 Release。
+- `.github/workflows/plugins.yml`：只构建内核插件（GeckoView 仅 arm64-v8a、R8 精简、so 压缩、已签名），发布到固定标签 `engine-plugins` 的 pre-release，主应用从这里下载。
+- 插件与主应用使用同一套签名 Secrets；未配置时插件回退 debug 签名（仍可安装，不会再出现未签名导致的 `INSTALL_PARSE_FAILED_NO_CERTIFICATES`）。
+
 ### Browser engines
 
 Mula supports Android WebView, Servo (separate runtime plugin), and GeckoView (separate runtime plugin). Servo and GeckoView are downloaded on demand from GitHub Releases and are not bundled into the main APK.

@@ -1,0 +1,102 @@
+name: Build Mula App
+
+# 浏览器主应用独立构建。内核插件见 plugins.yml，主应用运行时按需下载。
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+    paths-ignore:
+      - "gecko-engine-plugin/**"
+      - "servo-engine-plugin/**"
+      - ".github/workflows/plugins.yml"
+      - "**.md"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "9.7.1"
+
+      - name: Install Android SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager | head -1)
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "platform-tools" "platforms;android-37.0" "build-tools;36.0.0"
+
+      - name: Prepare signing key
+        if: env.KEYSTORE_BASE64 != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "$KEYSTORE_BASE64" | base64 --decode > mula-release.jks
+          test -s mula-release.jks
+
+      - name: Build release APK
+        if: env.KEYSTORE_BASE64 != ''
+        env:
+          MULA_KEYSTORE: mula-release.jks
+          MULA_STORE_PASS: ${{ secrets.STORE_PASSWORD }}
+          MULA_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          MULA_KEY_PASS: ${{ secrets.KEY_PASSWORD }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gradle :app:assembleRelease --no-daemon --stacktrace
+          APK=$(find app/build/outputs/apk/release -name '*.apk' -type f | head -1)
+          test -s "$APK"
+          mkdir -p dist
+          cp "$APK" dist/mula.apk
+
+      - name: Build debug APK (no signing key)
+        if: env.KEYSTORE_BASE64 == ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          gradle :app:assembleDebug --no-daemon --stacktrace
+          APK=$(find app/build/outputs/apk/debug -name '*.apk' -type f | head -1)
+          test -s "$APK"
+          mkdir -p dist
+          cp "$APK" dist/mula-debug.apk
+
+      - name: Verify APK signature
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs dist/*.apk
+          cd dist && sha256sum *.apk > SHA256SUMS && ls -lah
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mula-app-${{ github.ref_name }}
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Mula ${{ github.ref_name }}
+          files: dist/*
+          fail_on_unmatched_files: true
+          overwrite_files: true
+          generate_release_notes: true
