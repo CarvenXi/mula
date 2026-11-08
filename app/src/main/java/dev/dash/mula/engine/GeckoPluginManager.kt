@@ -7,6 +7,7 @@ import android.content.res.Resources
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import dalvik.system.DexClassLoader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -109,6 +110,30 @@ class GeckoPluginManager(context: Context) {
                 ensureNativeLibraries(supportedAbi())
             }
         }
+        verifyChildServices()
+    }
+
+    /**
+     * 插件 APK 不会被安装，GeckoView 的子进程服务只能靠主应用 Manifest 声明。
+     * 这里对照插件清单检查：关键服务缺失时直接报错（比运行时「页面一直白屏/内核进程拉不起来」好查得多）。
+     */
+    private fun verifyChildServices() {
+        val pm = app.packageManager
+        val flags = PackageManager.PackageInfoFlags.of(PackageManager.GET_SERVICES.toLong())
+        val shipped = pm.getPackageArchiveInfo(activeApk.absolutePath, flags)?.services
+            ?.map { it.name }.orEmpty().filter { it.startsWith(CHILD_SERVICE_PREFIX) }
+        if (shipped.isEmpty()) {
+            Log.w(TAG, "无法从插件清单读取 GeckoView 子进程服务，跳过声明校验")
+            return
+        }
+        val declared = pm.getPackageInfo(app.packageName, flags).services?.map { it.name }?.toSet().orEmpty()
+        val missing = shipped.filterNot { it in declared }
+        if (missing.isEmpty()) return
+        Log.w(TAG, "主应用 Manifest 未声明的 Gecko 子进程服务：$missing")
+        val critical = missing.filter { name -> CRITICAL_CHILD_SERVICES.any { name.endsWith(it) } }
+        check(critical.isEmpty()) {
+            "主应用 Manifest 缺少 GeckoView 子进程服务声明：${critical.joinToString { it.substringAfterLast('.') }}（共缺 ${missing.size} 个）"
+        }
     }
 
     fun createClassLoader(): ClassLoader {
@@ -148,7 +173,7 @@ class GeckoPluginManager(context: Context) {
             PackageManager.PackageInfoFlags.of(PackageManager.GET_META_DATA.toLong()),
         )?.applicationInfo ?: app.applicationInfo
         val appInfo = ApplicationInfo(archiveAppInfo).apply {
-            packageName = PLUGIN_PACKAGE
+            packageName = app.packageName
             sourceDir = activeApk.absolutePath
             publicSourceDir = activeApk.absolutePath
             nativeLibraryDir = File(native, supportedAbi()).absolutePath
@@ -162,8 +187,10 @@ class GeckoPluginManager(context: Context) {
             override fun getClassLoader(): ClassLoader = loader
             override fun getApplicationInfo(): ApplicationInfo = appInfo
             override fun getApplicationContext(): Context = applicationContext ?: this
-            override fun getPackageName(): String = PLUGIN_PACKAGE
+            // 必须是宿主包名：GeckoView 用它拼子进程 Service 的 ComponentName，服务声明在主应用 Manifest 里
+            override fun getPackageName(): String = app.packageName
             override fun getPackageResourcePath(): String = activeApk.absolutePath
+            override fun getPackageCodePath(): String = activeApk.absolutePath
             override fun getTheme(): Resources.Theme {
                 if (pluginTheme == null) {
                     pluginTheme = resources.newTheme().also { it.applyStyle(android.R.style.Theme_Material_NoActionBar, true) }
@@ -221,7 +248,9 @@ class GeckoPluginManager(context: Context) {
     }
 
     companion object {
-        private const val PLUGIN_PACKAGE = "dev.dash.mula.geckoplugin"
+        private const val CHILD_SERVICE_PREFIX = "org.mozilla.gecko.process."
+        private val CRITICAL_CHILD_SERVICES = listOf("\$tab0", "\$gpu", "\$socket", "\$utility")
+        private const val TAG = "MulaGecko"
         private val loaderLock = Any()
         @Volatile private var sharedLoader: ClassLoader? = null
         @Volatile private var sharedApkPath: String? = null

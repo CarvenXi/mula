@@ -17,7 +17,8 @@ class DynamicGeckoEngineAdapter private constructor(
         downloads = false,
         desktopUserAgent = false,
         findInPage = false,
-        pullToRefresh = true,
+        // GeckoView 自己处理滚动，宿主拿不到页面 scrollY，开着下拉刷新会在页内下滑时误触发
+        pullToRefresh = false,
         elementInspection = false,
         multipleInstances = true,
     )

@@ -536,6 +536,8 @@ class BrowserTab(private val appContext: Context, initialEngine: BrowserEngineTy
                 "onUrl" -> value?.let { url = it; syncNav() }
                 "onCanGoBack" -> { canGoBack = value == "true" }
                 "onCanGoForward" -> { canGoForward = value == "true" }
+                "onCrash" -> { loading = false; Diag.log("gecko content process crashed, recovering: $value") }
+                "onFatal" -> { loading = false; errorText = "GeckoView 内容进程反复崩溃，请切回 WebView 或重启应用"; Diag.log("gecko fatal: $value") }
             }
         }
         geckoAdapter = adapter

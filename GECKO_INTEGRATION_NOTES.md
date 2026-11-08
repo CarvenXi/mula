@@ -50,3 +50,29 @@ gradle :app:assembleDebug
 6. 首页与网页之间切换、沉浸式状态栏/导航栏和旋转适配正常。
 7. 更新插件：当前进程不崩溃，重启后新版本激活。
 8. 杀进程重启：GeckoRuntime 和资源/原生库重新初始化成功。
+
+## 子进程服务机制（重要）
+
+GeckoView 的渲染在独立 Android 子进程里：内容进程 `:tabN`、`:gpu`、`:socket`、`:utility`、`:gmplugin`，
+由 GeckoView 按固定类名（`org.mozilla.gecko.process.GeckoChildProcessServices$tabN` 等）`bindService` 拉起。
+插件 APK 从不被安装，所以这些服务必须满足三点，缺一不可：
+
+1. **主应用 Manifest 声明**：`app/src/main/AndroidManifest.xml` 里声明了 gpu/socket/utility/gmplugin 与 tab0–tab49
+   （多声明无副作用）。不设 `isolatedProcess`，因为插件文件在 `filesDir`，isolated 进程读不到。
+2. **类可被主应用 ClassLoader 找到**：`MulaApplication` 在 Gecko 子进程里（早于任何 Service 实例化）调用
+   `GeckoChildBootstrap.attach`，把插件 dex 前插进主应用 ClassLoader、把插件 so 目录加入原生库搜索路径，
+   并让子进程里的 `packageResourcePath / applicationInfo` 指向插件 APK（GeckoView 靠它找 omni.ja、libxul）。
+   父进程仍使用 `GeckoPluginManager` 的 DexClassLoader。
+3. **Context 包名必须是宿主包名**：插件 Context 的 `getPackageName()` 返回宿主包名，GeckoView 才会去绑
+   声明在主应用里的服务。
+
+`GeckoPluginManager.prepare()` 会对照插件 APK 清单校验声明；关键服务缺失时直接报错并回退 WebView。
+升级 GeckoView 后若报缺失，用 `apkanalyzer manifest print gecko-engine.apk | grep -A4 "<service"` 对照补齐。
+主应用还需要 `ACCESS_WIFI_STATE`、`MODIFY_AUDIO_SETTINGS`（GeckoView 的网络状态/音频，普通权限）。
+
+## 已知限制
+
+- 注入 ClassLoader 依赖非公开 API 反射（`BaseDexClassLoader.pathList` 等），系统大版本升级后需复测。
+- 子进程只注入 dex/so，不挂插件 Resources；如果 Gecko 子进程里有读资源的路径，需要再补。
+- GeckoView 的宿主 Context 目前是 Application Context：全屏视频/权限弹窗等依赖 Activity 的能力未接入。
+- 下拉刷新对 GeckoView 已关闭（宿主拿不到页面滚动位置）。
