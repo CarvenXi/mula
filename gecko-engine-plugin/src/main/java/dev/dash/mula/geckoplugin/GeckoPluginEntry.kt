@@ -54,7 +54,7 @@ object GeckoPluginEntry {
         val view = GeckoView(context)
         val handle = GeckoPluginHandle(session, view, listener)
         session.setContentDelegate(object : GeckoSession.ContentDelegate {
-            override fun onTitleChange(session: GeckoSession, title: String) = handle.updateTitle(title)
+            override fun onTitleChange(session: GeckoSession, title: String?) = handle.updateTitle(title)
         })
         session.setProgressDelegate(object : GeckoSession.ProgressDelegate {
             override fun onPageStart(session: GeckoSession, url: String) { listener.onEvent("onPageStart", url) }
