@@ -4,14 +4,6 @@
 
 ## 界面
 
-| 主页 | 更多面板 | 设置 |
-| --- | --- | --- |
-| ![主页](docs/screenshot-home.jpg) | ![更多](docs/screenshot-menu.jpg) | ![设置](docs/screenshot-settings.jpg) |
-
-| 网页 |
-| --- |
-| ![网页](docs/) |
-
 - 单条悬浮玻璃底栏：`‹` `›` + 地址胶囊 + 标签页 + 更多
 - 主页液态玻璃字标、收藏（带 favicon、可编辑、模糊底 + 高光描边）
 - 全部弹层走 MIUIX 规范：`OverlayDialog` / 自制面板（spring 滑入）
@@ -27,9 +19,7 @@
 - 首页打开网页后，后退可回到主页
 
 **脚本（油猴）**
-- 支持 `@name` / `@match` / `@include` / `@run-at` 元数据
-- `document-start` 脚本在页面可见时注入，其余在加载完成注入
-- GM API 垫片：`GM_setValue/getValue/deleteValue/listValues/addStyle/xmlhttprequest/notification/openInTab/registerMenuCommand/info`、`unsafeWindow`
+- 
 - 从 URL 导入 `.user.js`、一键更新；自动识别 `.user.js` 链接并弹导入确认
 
 **下载**
@@ -38,9 +28,8 @@
 - 前台服务 + 进度通知；按小米官方文档接入**超级岛**（`miui.focus.param`，仅在开始下载时上岛）
 
 **其他**
-- 收藏 / 历史（最多 300 条）/ 下载管理 / 脚本管理
+- 收藏 / 历史 / 下载管理 / 脚本管理
 - 设置：显示模式（跟随系统/日间/夜间）、主页壁纸、柔光玻璃、搜索引擎、自定义 UA、检查更新
-- 网页弹窗（`window.open`）在当前标签打开
 
 ## 部署
 
