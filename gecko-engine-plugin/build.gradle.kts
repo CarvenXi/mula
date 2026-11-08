@@ -6,11 +6,14 @@ val geckoViewVersion = providers.gradleProperty("geckoViewVersion").orElse("157.
 
 android {
     namespace = "dev.dash.mula.geckoplugin"
-    compileSdk = 37
+    compileSdk {
+        version = release(37) {
+            minorApiLevel = 2
+        }
     defaultConfig {
         applicationId = "dev.dash.mula.geckoplugin"
-        minSdk = 26
-        targetSdk = 36
+        minSdk = 33
+        targetSdk = 37
         versionCode = 1
         versionName = geckoViewVersion.get()
     }
