@@ -103,6 +103,12 @@ class BrowserTab(private val appContext: Context, initialEngine: BrowserEngineTy
     var errorText by mutableStateOf<String?>(null)
     /** 是否是从主页打开的第一个页面（用于「返回到主页」） */
     var fromHome by mutableStateOf(false)
+
+    /**
+     * 回主页前保存的地址。必须声明在 init 块之前：构造末尾会按初始内核调用 switchEngine → syncNav，
+     * 读取这个字段；放在 init 之后会还是 null，导致重启后选了 Servo / Gecko 时 NPE 闪退。
+     */
+    private var savedUrl: String = ""
         private set
 
     var closed = false
@@ -630,7 +636,6 @@ class BrowserTab(private val appContext: Context, initialEngine: BrowserEngineTy
     }
 
     /** 回主页 */
-    private var savedUrl: String = ""
 
     fun goHome() {
         savedUrl = url
