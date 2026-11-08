@@ -152,7 +152,7 @@ class GeckoPluginManager(context: Context) {
             sourceDir = activeApk.absolutePath
             publicSourceDir = activeApk.absolutePath
             nativeLibraryDir = File(native, supportedAbi()).absolutePath
-            dataDir = app.dataDir
+            dataDir = app.dataDir.absolutePath
             className = null
         }
         fun wrap(base: Context, applicationContext: Context?): Context = object : ContextWrapper(base) {
