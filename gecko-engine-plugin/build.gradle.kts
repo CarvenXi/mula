@@ -26,5 +26,5 @@ android {
 }
 
 dependencies {
-    implementation("org.mozilla.geckoview:geckoview-stable:${geckoViewVersion.get()}")
+    implementation("org.mozilla.geckoview:geckoview-nightly:${geckoViewVersion.get()}")
 }
