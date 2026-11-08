@@ -227,7 +227,9 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
-            isMinifyEnabled = true
+            // 不启用 R8：GeckoView / Servo 由宿主反射 + JNI 调用，整体都要保留，R8 几乎省不下体积，
+            // 却可能误改被 JNI / 反射按名称查找的类，导致「加载内核失败」。体积主要靠 arm64 单架构 + so 压缩。
+            isMinifyEnabled = false
             isShrinkResources = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }

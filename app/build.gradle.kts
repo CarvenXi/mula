@@ -33,8 +33,8 @@ android {
         applicationId = "dev.dash.mula"
         minSdk = 33
         targetSdk = 37
-        versionCode = 152
-        versionName = "v1.5.2"
+        versionCode = 151
+        versionName = "v1.5.1"
         buildConfigField("String", "SERVO_PLUGIN_APK_URL", "\"${servoPluginUrl.get()}\"")
         buildConfigField("String", "SERVO_PLUGIN_SHA256", "\"${servoPluginSha256.get()}\"")
         buildConfigField("String", "GECKO_PLUGIN_APK_URL", "\"${geckoPluginUrl.get()}\"")

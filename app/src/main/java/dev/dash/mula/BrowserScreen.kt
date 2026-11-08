@@ -161,18 +161,34 @@ fun BrowserScreen(
     }
     LaunchedEffect(settings.browserEngine) {
         val target = when (settings.browserEngine) { 1 -> BrowserEngineType.SERVO; 2 -> BrowserEngineType.GECKO; else -> BrowserEngineType.WEBVIEW }
-        val switched = runCatching {
+        var failure: Throwable? = null
+        val switched = try {
             if (target == BrowserEngineType.GECKO) {
                 withContext(kotlinx.coroutines.Dispatchers.IO) {
                     dev.dash.mula.engine.GeckoPluginManager(context).prepare()
                 }
             }
             state.switchEngine(target)
-        }.isSuccess
+            true
+        } catch (t: Throwable) {
+            if (t is kotlinx.coroutines.CancellationException) throw t
+            failure = t
+            false
+        }
         if (!switched && settings.browserEngine != 0) {
             val failedEngine = if (settings.browserEngine == 1) "Servo" else "GeckoView"
+            // 反射调用会包一层 InvocationTargetException，取最里面的真实原因，写进日志并显示在提示里
+            var root: Throwable = failure ?: Throwable("未知错误")
+            while (true) {
+                val next = (root as? java.lang.reflect.InvocationTargetException)?.targetException ?: root.cause ?: break
+                if (next === root) break
+                root = next
+            }
+            val detail = "${root.javaClass.simpleName}: ${root.message}"
+            android.util.Log.e("MulaEngine", "$failedEngine 内核加载失败", failure)
+            Diag.log("$failedEngine load failed: " + android.util.Log.getStackTraceString(failure))
             settings.updateBrowserEngine(0)
-            android.widget.Toast.makeText(context, "$failedEngine 内核加载失败，已回退到 WebView", android.widget.Toast.LENGTH_LONG).show()
+            android.widget.Toast.makeText(context, "$failedEngine 内核加载失败：$detail\n已回退到 WebView", android.widget.Toast.LENGTH_LONG).show()
         }
         if (settings.browserEngine != 0 && settings.pageEnhancements) settings.updatePageEnhancements(false)
     }

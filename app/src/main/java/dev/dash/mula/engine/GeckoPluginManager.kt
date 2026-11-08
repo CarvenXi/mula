@@ -61,8 +61,8 @@ class GeckoPluginManager(context: Context) {
                 ZipFile(part).use { zip ->
                     require(zip.getEntry("classes.dex") != null) { "GeckoView 插件缺少 classes.dex" }
                     require(zip.getEntry("AndroidManifest.xml") != null) { "GeckoView 插件不是有效 APK" }
-                    require(zip.entries().asSequence().any { it.name.startsWith("lib/") && it.name.endsWith(".so") }) {
-                        "GeckoView 插件未包含原生引擎库"
+                    require(zip.entries().asSequence().any { it.name.startsWith("lib/arm64-v8a/") && it.name.endsWith(".so") }) {
+                        "GeckoView 插件未包含 arm64-v8a 原生引擎库"
                     }
                 }
                 val actual = sha256(part)

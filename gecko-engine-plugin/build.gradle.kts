@@ -50,9 +50,9 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
-            // 插件只有一个入口类，其余是 GeckoView：R8 去掉没用到的 Java 代码；GeckoView / 入口类由 proguard-rules.pro 保留
-            isMinifyEnabled = true
-            // 资源极少，且 GeckoView 部分资源靠名称反射获取，不做资源裁剪以免误删
+            // 不启用 R8：GeckoView / Servo 由宿主反射 + JNI 调用，整体都要保留，R8 几乎省不下体积，
+            // 却可能误改被 JNI / 反射按名称查找的类，导致「加载内核失败」。体积主要靠 arm64 单架构 + so 压缩。
+            isMinifyEnabled = false
             isShrinkResources = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
