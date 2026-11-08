@@ -1,4 +1,3 @@
-
 name: Build & Release Mula
 
 on:
@@ -15,7 +14,6 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     env:
       KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
       STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
@@ -47,6 +45,47 @@ jobs:
             "platforms;android-37.0" \
             "build-tools;36.0.0"
 
+      - name: Warm up Gecko Kotlin compiler dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/warm-kotlin-deps.init.gradle" <<'GRADLE_INIT'
+          gradle.projectsEvaluated {
+              def gecko = gradle.rootProject.findProject(":gecko-engine-plugin")
+              if (gecko == null) {
+                  throw new GradleException("Project :gecko-engine-plugin was not found")
+              }
+              gecko.tasks.register("warmKotlinCompilerDependencies") {
+                  group = "build setup"
+                  doLast {
+                      def configuration = gecko.configurations.findByName("kotlinBuildToolsApiClasspath")
+                      if (configuration == null) {
+                          throw new GradleException("Configuration kotlinBuildToolsApiClasspath was not found")
+                      }
+                      println("Pre-downloading ${configuration.name}...")
+                      configuration.resolve()
+                      println("Kotlin compiler dependencies are cached.")
+                  }
+              }
+          }
+          GRADLE_INIT
+
+          for attempt in 1 2 3; do
+            echo "Kotlin dependency warm-up attempt ${attempt}/3"
+            if gradle -I "$RUNNER_TEMP/warm-kotlin-deps.init.gradle" \
+                :gecko-engine-plugin:warmKotlinCompilerDependencies \
+                --no-daemon --stacktrace; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              delay=$((attempt * 20))
+              echo "Warm-up failed; retrying in ${delay}s..."
+              sleep "$delay"
+            fi
+          done
+          echo "ERROR: Could not download Gecko Kotlin compiler dependencies after 3 attempts."
+          exit 1
+
       - name: Prepare signing key
         if: env.KEYSTORE_BASE64 != ''
         run: |
@@ -56,17 +95,11 @@ jobs:
       - name: Build Servo plugin
         run: |
           set -e
-          gradle :servo-engine-plugin:assembleRelease \
-            --no-daemon --stacktrace
-
+          gradle :servo-engine-plugin:assembleRelease --no-daemon --stacktrace
           mkdir -p dist
-
-          PLUGIN=$(find servo-engine-plugin/build/outputs/apk/release \
-            -name '*.apk' -type f | head -1)
-
+          PLUGIN=$(find servo-engine-plugin/build/outputs/apk/release -name '*.apk' -type f | head -1)
           test -n "$PLUGIN"
           test -s "$PLUGIN"
-
           cp "$PLUGIN" dist/servo-engine.apk
           cd dist
           sha256sum servo-engine.apk > servo-engine.apk.sha256
@@ -94,13 +127,9 @@ jobs:
         run: |
           set -e
           gradle :app:assembleRelease --no-daemon --stacktrace
-
-          APK=$(find app/build/outputs/apk/release \
-            -name '*.apk' -type f | head -1)
-
+          APK=$(find app/build/outputs/apk/release -name '*.apk' -type f | head -1)
           test -n "$APK"
           test -s "$APK"
-
           mkdir -p dist
           cp "$APK" dist/mula.apk
 
@@ -109,13 +138,9 @@ jobs:
         run: |
           set -e
           gradle :app:assembleDebug --no-daemon --stacktrace
-
-          APK=$(find app/build/outputs/apk/debug \
-            -name '*.apk' -type f | head -1)
-
+          APK=$(find app/build/outputs/apk/debug -name '*.apk' -type f | head -1)
           test -n "$APK"
           test -s "$APK"
-
           mkdir -p dist
           cp "$APK" dist/mula-debug.apk
 
@@ -124,12 +149,10 @@ jobs:
           set -e
           echo "========== Release files =========="
           ls -lah dist/
-
           test -s dist/servo-engine.apk
           test -s dist/servo-engine.apk.sha256
           test -s dist/gecko-engine.apk
           test -s dist/gecko-engine.apk.sha256
-
           if [ -f dist/mula.apk ]; then
             test -s dist/mula.apk
           elif [ -f dist/mula-debug.apk ]; then
@@ -138,7 +161,6 @@ jobs:
             echo "ERROR: Mula APK missing"
             exit 1
           fi
-
           sha256sum -c dist/servo-engine.apk.sha256
           sha256sum -c dist/gecko-engine.apk.sha256
 
