@@ -32,9 +32,9 @@ android {
     defaultConfig {
         applicationId = "dev.dsh.miuixbrowser"
         minSdk = 33
-        targetSdk = 36
-        versionCode = 130
-        versionName = "v1.3.0"
+        targetSdk = 37
+        versionCode = 140
+        versionName = "v1.4.0"
         buildConfigField("String", "SERVO_PLUGIN_APK_URL", "\"${servoPluginUrl.get()}\"")
         buildConfigField("String", "SERVO_PLUGIN_SHA256", "\"${servoPluginSha256.get()}\"")
         buildConfigField("String", "GECKO_PLUGIN_APK_URL", "\"${geckoPluginUrl.get()}\"")
