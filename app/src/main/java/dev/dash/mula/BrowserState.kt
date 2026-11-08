@@ -528,6 +528,7 @@ class BrowserTab(private val appContext: Context, initialEngine: BrowserEngineTy
             geckoPluginManager,
             initialUri,
         ) { event, value ->
+            if (event != "onProgress") Diag.log("gecko event $event ${value?.take(160).orEmpty()}")
             when (event) {
                 "onPageStart" -> { loading = true; progress = 0f; errorText = null }
                 "onPageStop" -> { loading = false; progress = 1f; syncNav(); onVisited?.invoke(url, title) }

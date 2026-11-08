@@ -6,6 +6,7 @@ import org.mozilla.geckoview.GeckoResult
 import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.GeckoSession
 import org.mozilla.geckoview.GeckoView
+import org.mozilla.geckoview.WebRequestError
 
 /** Callback ABI intentionally uses only strings so the host does not need GeckoView classes. */
 interface GeckoPluginListener {
@@ -82,6 +83,8 @@ object GeckoPluginEntry {
             override fun onTitleChange(session: GeckoSession, title: String?) = handle.updateTitle(title)
             override fun onCrash(session: GeckoSession) = handle.recover()
             override fun onKill(session: GeckoSession) = handle.recover()
+            // 区分「页面没加载」和「加载了但没画出来（白屏）」
+            override fun onFirstContentfulPaint(session: GeckoSession) { listener.onEvent("onFirstPaint", "") }
         })
         session.setProgressDelegate(object : GeckoSession.ProgressDelegate {
             override fun onPageStart(session: GeckoSession, url: String) { listener.onEvent("onPageStart", url) }
@@ -101,6 +104,10 @@ object GeckoPluginEntry {
             override fun onCanGoBack(session: GeckoSession, canGoBack: Boolean) = handle.updateBack(canGoBack)
             override fun onCanGoForward(session: GeckoSession, canGoForward: Boolean) = handle.updateForward(canGoForward)
             // target=_blank / window.open：宿主暂不支持插件内新建标签，直接在当前标签打开，避免链接点了没反应
+            override fun onLoadError(session: GeckoSession, uri: String?, error: WebRequestError): GeckoResult<String>? {
+                listener.onEvent("onLoadError", "$uri code=${error.code} category=${error.category}")
+                return null // 交给 Gecko 默认错误页
+            }
             override fun onNewSession(session: GeckoSession, uri: String): GeckoResult<GeckoSession>? {
                 handle.load(uri)
                 return null

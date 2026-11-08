@@ -61,7 +61,9 @@ class DynamicServoEngineAdapter private constructor(
                     else -> null
                 }
             }
+            ServoTouchBridge.dumpApi(p, viewClass, clientClass, navigatorClass)
             val view = ctor.newInstance(*args) as? View ?: error("ServoView 未返回 Android View")
+            ServoTouchBridge.install(view)
             return DynamicServoEngineAdapter(view, navigator, classLoader)
         }
 

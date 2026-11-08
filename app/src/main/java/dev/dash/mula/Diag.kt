@@ -23,6 +23,12 @@ object Diag {
             }
             file = current.apply { writeText("") }
             log("diag at ${file?.absolutePath}")
+            // Gecko 子进程自己写的日志（含崩溃堆栈），并入本次日志后清空
+            val child = File(dir, "diag-child.txt")
+            if (child.isFile && child.length() > 0) {
+                log("child-process log:\n" + child.readText().takeLast(24 * 1024))
+                runCatching { child.writeText("") }
+            }
             logLastExitReasons(context)
         }
     }

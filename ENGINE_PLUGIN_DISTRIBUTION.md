@@ -22,7 +22,17 @@ GitHub Actions 会自动构建并发布 Servo 插件：
   -PservoPluginSha256=<64位SHA256>
 ```
 
-如果使用默认发布地址，首次需要推送一个 `v*` 标签触发 Release 工作流，确保 Release 中包含插件 APK 和 SHA-256 文件。`main` 分支构建会将插件作为 Actions artifact 输出，但不会自动创建 GitHub Release。
+### 自动构建规则（`.github/workflows/plugins.yml`）
+
+插件随代码变动自动构建，任一路径变动都会触发：`gecko-engine-plugin/**`、`servo-engine-plugin/**`、
+主应用里的反射适配层 `app/src/main/java/dev/dash/mula/engine/**`、根 Gradle 配置、`gradle/**`（版本目录/Wrapper）、`scripts/**`、工作流本身。
+
+- push 到 `main` 或推送 `v*` 标签：构建 Gecko / Servo 两个插件，并滚动发布到固定标签 `engine-plugins` 的 Release（pre-release）。
+- Pull Request：只构建并上传 artifact 做验证，不发布。
+- 手动运行（workflow_dispatch）：可选择是否发布。
+- 未配置 `KEYSTORE_BASE64` 时（含 fork 的 PR）使用 debug 签名，可构建、可安装。
+
+主应用已安装的插件不会因此自动替换：设置里点「内核管理」重新下载，或在应用内加自动检查更新。
 
 ## 运行流程
 

@@ -30,6 +30,19 @@ object GeckoChildBootstrap {
     fun activeApk(context: Context) = File(pluginRoot(context), "gecko-engine-active.apk")
     fun nativeDir(context: Context) = File(pluginRoot(context), "lib/arm64-v8a")
 
+    /** 子进程没有 Diag.init，这里直接追加写 diag-child.txt（主进程下次启动时并入 diag.txt）。 */
+    fun note(context: Context, message: String, error: Throwable? = null) {
+        val line = "${java.text.SimpleDateFormat("HH:mm:ss.SSS", java.util.Locale.US).format(java.util.Date())}  " +
+            "[${Application.getProcessName()}] $message" +
+            (error?.let { "\n" + Log.getStackTraceString(it) } ?: "") + "\n"
+        if (error != null) Log.e(TAG, message, error) else Log.i(TAG, message)
+        runCatching {
+            val dir = context.externalMediaDirs.firstOrNull() ?: context.filesDir
+            dir.mkdirs()
+            File(dir, "diag-child.txt").appendText(line)
+        }
+    }
+
     fun isGeckoChildProcess(context: Context): Boolean {
         val name = Application.getProcessName() ?: return false
         return name.startsWith(context.packageName + ":")
@@ -40,16 +53,26 @@ object GeckoChildBootstrap {
         if (!isGeckoChildProcess(app)) return null
         val apk = activeApk(app)
         val lib = nativeDir(app)
+        // 子进程的未捕获异常（Gecko 子进程崩溃时主进程拿不到堆栈）写进 diag-child.txt
+        val previous = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler { thread, error ->
+            note(app, "UNCAUGHT in thread ${thread.name}", error)
+            previous?.uncaughtException(thread, error)
+        }
         if (!apk.isFile) {
-            Log.w(TAG, "plugin apk missing in ${Application.getProcessName()}: $apk")
+            note(app, "plugin apk missing: $apk")
             return null
         }
         val loader = app.classLoader
         runCatching { prependDex(loader, apk) }
-            .onFailure { Log.e(TAG, "inject dex failed", it) }
+            .onSuccess { note(app, "dex injected: apk=$apk size=${apk.length()} writable=${apk.canWrite()}") }
+            .onFailure { note(app, "inject dex FAILED", it) }
         runCatching { addNativeDir(loader, lib) }
-            .onFailure { Log.e(TAG, "add native dir failed", it) }
-        Log.i(TAG, "attached ${Application.getProcessName()} apk=$apk lib=$lib")
+            .onSuccess { note(app, "native dir added: $lib files=${lib.list()?.size}") }
+            .onFailure { note(app, "add native dir FAILED", it) }
+        runCatching { loader.loadClass("org.mozilla.gecko.process.GeckoServiceChildProcess") }
+            .onSuccess { note(app, "probe GeckoServiceChildProcess loadable") }
+            .onFailure { note(app, "probe GeckoServiceChildProcess NOT loadable", it) }
         return Payload(apk, lib)
     }
 

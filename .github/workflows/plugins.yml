@@ -4,14 +4,32 @@ name: Build Engine Plugins
 # 产物发布到固定标签 `engine-plugins` 的 Release（滚动覆盖，标记为 pre-release，不会抢占主应用的 "latest"），
 # 主应用默认从 https://github.com/<repo>/releases/download/engine-plugins/<name>.apk 下载。
 on:
+  # 内核插件随代码变动自动构建：
+  # - 插件模块、主应用里与插件对接的反射适配层、Gradle 配置/版本目录/脚本任一变动都会触发；
+  # - PR 只构建验证，不发布；push 到 main 或打 v* 标签才发布到滚动标签 engine-plugins。
   push:
     branches: [main]
+    tags: ["v*"]
     paths:
       - "gecko-engine-plugin/**"
       - "servo-engine-plugin/**"
+      - "app/src/main/java/dev/dash/mula/engine/**"
       - "build.gradle.kts"
       - "settings.gradle.kts"
       - "gradle.properties"
+      - "gradle/**"
+      - "scripts/**"
+      - ".github/workflows/plugins.yml"
+  pull_request:
+    paths:
+      - "gecko-engine-plugin/**"
+      - "servo-engine-plugin/**"
+      - "app/src/main/java/dev/dash/mula/engine/**"
+      - "build.gradle.kts"
+      - "settings.gradle.kts"
+      - "gradle.properties"
+      - "gradle/**"
+      - "scripts/**"
       - ".github/workflows/plugins.yml"
   workflow_dispatch:
     inputs:
@@ -24,8 +42,9 @@ permissions:
   contents: write
 
 concurrency:
-  group: engine-plugins
-  cancel-in-progress: false
+  # 发布串行（不取消进行中的发布）；PR 按分支独立排队，互不阻塞
+  group: engine-plugins-${{ github.event_name == 'pull_request' && github.ref || 'publish' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
@@ -146,7 +165,7 @@ jobs:
 
   release:
     needs: build
-    if: github.event_name == 'push' || inputs.publish
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.publish)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
