@@ -5,10 +5,14 @@ plugins {
 val geckoViewVersion = providers.gradleProperty("geckoViewVersion").orElse("157.0.20260910085851")
 
 android {
-    namespace = "dev.dsh.miuixbrowser.geckoplugin"
-    compileSdk = 37
+    namespace = "dev.dash.mula.geckoplugin"
+    compileSdk {
+        version = release(37) {
+            minorApiLevel = 0
+        }
+    }
     defaultConfig {
-        applicationId = "dev.dsh.miuixbrowser.geckoplugin"
+        applicationId = "dev.dash.mula.geckoplugin"
         minSdk = 26
         targetSdk = 36
         versionCode = 1

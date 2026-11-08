@@ -34,9 +34,13 @@ val prepareServoAar by tasks.registering {
 }
 
 android {
-    namespace = "dev.dsh.miuixbrowser.servoplugin"
-    compileSdk = 37
-    defaultConfig { applicationId = "dev.dsh.miuixbrowser.servoplugin"; minSdk = 33; targetSdk = 36; versionCode = 1; versionName = "1.0.0" }
+    namespace = "dev.dash.mula.servoplugin"
+    compileSdk {
+        version = release(37) {
+            minorApiLevel = 0
+        }
+    }
+    defaultConfig { applicationId = "dev.dash.mula.servoplugin"; minSdk = 33; targetSdk = 36; versionCode = 1; versionName = "1.0.0" }
     buildTypes { release { isMinifyEnabled = false } }
     packaging { jniLibs { useLegacyPackaging = false }; resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
 }

@@ -42,10 +42,11 @@ jobs:
           set -e
           SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager | head -1)
           yes | "$SDKMANAGER" --licenses >/dev/null || true
-          "$SDKMANAGER" \
+          "$SDKMANAGER" --channel=3 \
             "platform-tools" \
-            "platforms;android-37" \
+            "platforms;android-37.0" \
             "build-tools;36.0.0"
+          test -d "$ANDROID_HOME/platforms/android-37"
 
       - name: Prepare signing key
         if: env.KEYSTORE_BASE64 != ''

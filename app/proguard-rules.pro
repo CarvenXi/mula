@@ -1,3 +1,3 @@
 # mafari proguard rules
 -dontwarn org.jetbrains.compose.**
--keep class dev.dsh.miuixbrowser.** { *; }
+-keep class dev.dash.mula.** { *; }
